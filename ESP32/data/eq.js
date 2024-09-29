@@ -1,3 +1,13 @@
+/**
+ * FILE: eq.js
+ */
+
+
+
+// Choose to print when dragging the filter dot, or when finished dragging 
+let printOnMove = false;
+/******/
+
 const canvas = document.getElementById('graph');
 const ctx = canvas.getContext('2d');
 
@@ -15,6 +25,7 @@ const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
 let selectedFilterIndex = null;
 let draggingFilterIndex = null;
 let isDragging = false;
+
 
 
 // Logarithmic frequency mapping
@@ -253,8 +264,7 @@ document.getElementById('qSlider').oninput = function ()
 };
 
 // Mouse interaction for dragging filter dots
-canvas.addEventListener('mousedown', function (e) 
-{
+canvas.addEventListener('mousedown', function (e) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -272,8 +282,7 @@ canvas.addEventListener('mousedown', function (e)
     });
 });
 
-canvas.addEventListener('mousemove', function (e) 
-{
+canvas.addEventListener('mousemove', function (e) {
     if (isDragging && draggingFilterIndex !== null) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -286,13 +295,17 @@ canvas.addEventListener('mousemove', function (e)
         drawAllCurves();
         updateSliders();  // Update sliders when moving dot
 
-        //printFilterValues(filter);
+        if (printOnMove) {
+            printFilterValues(filter); // Print while moving
+        }
     }
 });
 
-canvas.addEventListener('mouseup', function () 
-{
+canvas.addEventListener('mouseup', function () {
     isDragging = false;
+    if (draggingFilterIndex !== null && !printOnMove) {
+        printFilterValues(filters[draggingFilterIndex]); // Print after releasing the mouse button
+    }
     draggingFilterIndex = null;
 });
 
