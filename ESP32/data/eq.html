@@ -3,26 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EQ Filters with Logarithmic Scale & Filter Selection</title>
-    <style>
-        canvas {
-            background-color: #222;
-            border: 1px solid black;
-        }
-        .slider-container {
-            margin-top: 20px;
-        }
-        .slider-container label {
-            display: inline-block;
-            width: 100px;
-        }
-        .slider-container input {
-            width: 300px;
-        }
-        .filter-container {
-            margin-bottom: 30px;
-        }
-    </style>
+    <title>DigiMix EQ</title>
+    <link rel="stylesheet" href="eq.css">
 </head>
 <body>
     <canvas id="graph" width="800" height="400"></canvas>
@@ -48,6 +30,7 @@
     </div>
 
     <button onclick="addFilter()">Add Filter</button>
+    <button onclick="removeFilter()">Remove Filter</button>
 
     <script>
         const canvas = document.getElementById('graph');
@@ -62,7 +45,7 @@
             gainMax: 20
         };
 
-        const filters = [];
+        let filters = [];
         const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
         let selectedFilterIndex = null;
         let draggingFilterIndex = null;
@@ -169,14 +152,13 @@
 
         function addFilter() {
             const filterId = filters.length;
-            const color = colors[filterId % colors.length];
 
             const filter = {
                 id: filterId,
                 frequency: 1000,
                 gain: 0,
                 q: 1,
-                color: color
+                color: colors[filterId % colors.length]  // Assign color based on id % number of available colors
             };
 
             filters.push(filter);
@@ -194,6 +176,37 @@
             filterSelect.value = filter.id; // Automatically select new filter
         }
 
+        function removeFilter() {
+            if (selectedFilterIndex !== null) {
+                // Remove the filter from the filters array
+                filters.splice(selectedFilterIndex, 1);
+
+                // Remove the filter from the dropdown
+                const filterSelect = document.getElementById('filterSelect');
+                filterSelect.remove(selectedFilterIndex);
+
+                // Reassign IDs and update dropdown after removal
+                filters.forEach((filter, index) => {
+                    filter.id = index;
+                    filter.color = colors[index % colors.length];  // Reassign the color based on index
+                    filterSelect.options[index].value = index;
+                    filterSelect.options[index].text = `Filter ${index + 1}`;
+                });
+
+                // Set the selected filter index to the last one or null
+                if (filters.length > 0) {
+                    selectedFilterIndex = filters.length - 1;
+                    filterSelect.value = selectedFilterIndex;
+                } else {
+                    selectedFilterIndex = null;
+                    filterSelect.value = '';
+                }
+
+                updateSliders();
+                drawAllCurves();
+            }
+        }
+
         function selectFilter(id) {
             selectedFilterIndex = id;
             const filterSelect = document.getElementById('filterSelect');
@@ -209,42 +222,54 @@
         }
 
         function updateSliders() {
-            const filter = filters[selectedFilterIndex];
-            document.getElementById('frequencySlider').value = filter.frequency;
-            document.getElementById('gainSlider').value = filter.gain;
-            document.getElementById('qSlider').value = filter.q;
+            if (selectedFilterIndex !== null) {
+                const filter = filters[selectedFilterIndex];
+                document.getElementById('frequencySlider').value = filter.frequency;
+                document.getElementById('gainSlider').value = filter.gain;
+                document.getElementById('qSlider').value = filter.q;
 
-            document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
-            document.getElementById('gainValue').textContent = filter.gain + ' dB';
-            document.getElementById('qValue').textContent = filter.q;
+                document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
+                document.getElementById('gainValue').textContent = filter.gain + ' dB';
+                document.getElementById('qValue').textContent = filter.q;
+            } else {
+                document.getElementById('frequencySlider').value = '';
+                document.getElementById('gainSlider').value = '';
+                document.getElementById('qSlider').value = '';
+
+                document.getElementById('frequencyValue').textContent = '';
+                document.getElementById('gainValue').textContent = '';
+                document.getElementById('qValue').textContent = '';
+            }
         }
 
-        // Slider event listeners to update the selected filter
         document.getElementById('frequencySlider').oninput = function () {
-            const filter = filters[selectedFilterIndex];
-            filter.frequency = parseInt(this.value);
-            document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
-            drawAllCurves();
-            printFilterValues(filter);
+            if (selectedFilterIndex !== null) {
+                filters[selectedFilterIndex].frequency = parseInt(this.value);
+                document.getElementById('frequencyValue').textContent = this.value + ' Hz';
+                drawAllCurves();
+                printFilterValues(filters[selectedFilterIndex]);
+            }
         };
 
         document.getElementById('gainSlider').oninput = function () {
-            const filter = filters[selectedFilterIndex];
-            filter.gain = parseFloat(this.value).toFixed(1);
-            document.getElementById('gainValue').textContent = filter.gain + ' dB';
-            drawAllCurves();
-            printFilterValues(filter);
+            if (selectedFilterIndex !== null) {
+                filters[selectedFilterIndex].gain = parseFloat(this.value);
+                document.getElementById('gainValue').textContent = this.value + ' dB';
+                drawAllCurves();
+                printFilterValues(filters[selectedFilterIndex]);
+            }
         };
 
         document.getElementById('qSlider').oninput = function () {
-            const filter = filters[selectedFilterIndex];
-            filter.q = parseFloat(this.value);
-            document.getElementById('qValue').textContent = filter.q;
-            drawAllCurves();
-            printFilterValues(filter);
+            if (selectedFilterIndex !== null) {
+                filters[selectedFilterIndex].q = parseFloat(this.value);
+                document.getElementById('qValue').textContent = this.value;
+                drawAllCurves();
+                printFilterValues(filters[selectedFilterIndex]);
+            }
         };
 
-        // Allow moving dots with mouse
+        // Mouse interaction for dragging filter dots
         canvas.addEventListener('mousedown', function (e) {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
@@ -275,6 +300,7 @@
 
                 drawAllCurves();
                 updateSliders();  // Update sliders when moving dot
+
                 printFilterValues(filter);
             }
         });
@@ -317,6 +343,7 @@
             }
         }
 
+
         function printFilterValues(filter) {
             const filterData = {
                 id: filter.id,
@@ -327,8 +354,8 @@
             console.log(JSON.stringify(filterData));
         }
 
-        // Initialize
-        addFilter();  // Add the first filter by default
+
+        // Initialize without filters
         drawGrid();
         drawAllCurves();
     </script>
