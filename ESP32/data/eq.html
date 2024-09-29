@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EQ Filters with Logarithmic Scale & Filter Selection</title>
+    <style>
+        canvas {
+            background-color: #222;
+            border: 1px solid black;
+        }
+        .slider-container {
+            margin-top: 20px;
+        }
+        .slider-container label {
+            display: inline-block;
+            width: 100px;
+        }
+        .slider-container input {
+            width: 300px;
+        }
+        .filter-container {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="graph" width="800" height="400"></canvas>
+
+    <div class="filter-container">
+        <label for="filterSelect">Select Filter: </label>
+        <select id="filterSelect" onchange="onFilterDropdownChange()"></select>
+    </div>
+
+    <div id="controls">
+        <div class="slider-container">
+            <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
+            <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1">
+        </div>
+        <div class="slider-container">
+            <label>Gain: <span id="gainValue">0 dB</span></label>
+            <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label>Q: <span id="qValue">1.0</span></label>
+            <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05">
+        </div>
+    </div>
+
+    <button onclick="addFilter()">Add Filter</button>
+
+    <script>
+        const canvas = document.getElementById('graph');
+        const ctx = canvas.getContext('2d');
+
+        const graph = {
+            width: canvas.width,
+            height: canvas.height,
+            freqMin: 20,
+            freqMax: 20000,
+            gainMin: -20,
+            gainMax: 20
+        };
+
+        const filters = [];
+        const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
+        let selectedFilterIndex = null;
+        let draggingFilterIndex = null;
+        let isDragging = false;
+
+        // Logarithmic frequency mapping
+        function xToFreq(x) {
+            const logFreqMin = Math.log10(graph.freqMin);
+            const logFreqMax = Math.log10(graph.freqMax);
+            const logFreq = logFreqMin + (x / graph.width) * (logFreqMax - logFreqMin);
+            return Math.round(Math.pow(10, logFreq));  // Ensure frequency is integer
+        }
+
+        function freqToX(freq) {
+            const logFreqMin = Math.log10(graph.freqMin);
+            const logFreqMax = Math.log10(graph.freqMax);
+            const logFreq = Math.log10(freq);
+            return ((logFreq - logFreqMin) / (logFreqMax - logFreqMin)) * graph.width;
+        }
+
+        function gainToY(gain) {
+            return (graph.height / 2) - ((gain / graph.gainMax) * (graph.height / 2));
+        }
+
+        function yToGain(y) {
+            return parseFloat((((graph.height / 2 - y) / (graph.height / 2)) * graph.gainMax).toFixed(1));  // Ensure gain has 1 decimal
+        }
+
+        function drawCurve(filter) {
+            const { frequency, gain, q, color } = filter;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            for (let x = 0; x <= graph.width; x++) {
+                const freq = xToFreq(x);
+                const distance = Math.log(freq / frequency);
+                const gainAdjustment = gain * Math.exp(-Math.pow(distance / (q), 2));
+
+                const y = gainToY(gainAdjustment);
+
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+            drawDot(filter);
+        }
+
+        function drawDot(filter) {
+            const { frequency, gain, color } = filter;
+            const dotX = freqToX(frequency);
+            const dotY = gainToY(gain);
+
+            ctx.beginPath();
+            ctx.arc(dotX, dotY, 8, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawAllCurves() {
+            ctx.clearRect(0, 0, graph.width, graph.height);
+            drawGrid();
+
+            // Draw individual filter curves
+            filters.forEach(filter => {
+                drawCurve(filter);
+            });
+
+            // Draw the combined resulting curve
+            drawResultingCurve();
+        }
+
+        function drawResultingCurve() {
+            ctx.strokeStyle = 'grey';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            for (let x = 0; x <= graph.width; x++) {
+                const freq = xToFreq(x);
+                let totalGain = 0;
+
+                filters.forEach(filter => {
+                    const distance = Math.log(freq / filter.frequency);
+                    const gainAdjustment = filter.gain * Math.exp(-Math.pow(distance / (filter.q), 2));
+                    totalGain += gainAdjustment;
+                });
+
+                const y = gainToY(totalGain);
+
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.stroke();
+        }
+
+        function addFilter() {
+            const filterId = filters.length;
+            const color = colors[filterId % colors.length];
+
+            const filter = {
+                id: filterId,
+                frequency: 1000,
+                gain: 0,
+                q: 1,
+                color: color
+            };
+
+            filters.push(filter);
+            addFilterToDropdown(filter);
+            selectFilter(filterId);
+            drawAllCurves();
+        }
+
+        function addFilterToDropdown(filter) {
+            const filterSelect = document.getElementById('filterSelect');
+            const option = document.createElement('option');
+            option.value = filter.id;
+            option.textContent = `Filter ${filter.id + 1}`;
+            filterSelect.appendChild(option);
+            filterSelect.value = filter.id; // Automatically select new filter
+        }
+
+        function selectFilter(id) {
+            selectedFilterIndex = id;
+            const filterSelect = document.getElementById('filterSelect');
+            filterSelect.value = id; // Update dropdown to reflect the selected filter
+            updateSliders();
+            drawAllCurves();
+        }
+
+        function onFilterDropdownChange() {
+            const filterSelect = document.getElementById('filterSelect');
+            const selectedId = parseInt(filterSelect.value);
+            selectFilter(selectedId);
+        }
+
+        function updateSliders() {
+            const filter = filters[selectedFilterIndex];
+            document.getElementById('frequencySlider').value = filter.frequency;
+            document.getElementById('gainSlider').value = filter.gain;
+            document.getElementById('qSlider').value = filter.q;
+
+            document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
+            document.getElementById('gainValue').textContent = filter.gain + ' dB';
+            document.getElementById('qValue').textContent = filter.q;
+        }
+
+        // Slider event listeners to update the selected filter
+        document.getElementById('frequencySlider').oninput = function () {
+            const filter = filters[selectedFilterIndex];
+            filter.frequency = parseInt(this.value);
+            document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
+            drawAllCurves();
+            printFilterValues(filter);
+        };
+
+        document.getElementById('gainSlider').oninput = function () {
+            const filter = filters[selectedFilterIndex];
+            filter.gain = parseFloat(this.value).toFixed(1);
+            document.getElementById('gainValue').textContent = filter.gain + ' dB';
+            drawAllCurves();
+            printFilterValues(filter);
+        };
+
+        document.getElementById('qSlider').oninput = function () {
+            const filter = filters[selectedFilterIndex];
+            filter.q = parseFloat(this.value);
+            document.getElementById('qValue').textContent = filter.q;
+            drawAllCurves();
+            printFilterValues(filter);
+        };
+
+        // Allow moving dots with mouse
+        canvas.addEventListener('mousedown', function (e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            filters.forEach((filter, index) => {
+                const dotX = freqToX(filter.frequency);
+                const dotY = gainToY(filter.gain);
+
+                const dist = Math.sqrt(Math.pow(mouseX - dotX, 2) + Math.pow(mouseY - dotY, 2));
+                if (dist < 8) {
+                    draggingFilterIndex = index;
+                    selectFilter(index);  // Update selected filter when dot is clicked
+                    isDragging = true;
+                }
+            });
+        });
+
+        canvas.addEventListener('mousemove', function (e) {
+            if (isDragging && draggingFilterIndex !== null) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                const filter = filters[draggingFilterIndex];
+                filter.frequency = xToFreq(mouseX);
+                filter.gain = yToGain(mouseY);
+
+                drawAllCurves();
+                updateSliders();  // Update sliders when moving dot
+                printFilterValues(filter);
+            }
+        });
+
+        canvas.addEventListener('mouseup', function () {
+            isDragging = false;
+            draggingFilterIndex = null;
+        });
+
+        function drawGrid() {
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+
+            // Draw horizontal lines (gains)
+            for (let gain = graph.gainMin; gain <= graph.gainMax; gain += 5) {
+                const y = gainToY(gain);
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(graph.width, y);
+                ctx.stroke();
+
+                ctx.fillStyle = 'white';
+                ctx.fillText(`${gain} dB`, 5, y - 5);
+            }
+
+            // Draw vertical lines (frequencies)
+            const logFreqMin = Math.log10(graph.freqMin);
+            const logFreqMax = Math.log10(graph.freqMax);
+            for (let logFreq = logFreqMin; logFreq <= logFreqMax; logFreq += 0.25) {
+                const freq = Math.pow(10, logFreq);
+                const x = freqToX(freq);
+
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, graph.height);
+                ctx.stroke();
+
+                ctx.fillStyle = 'white';
+                ctx.fillText(`${Math.round(freq)} Hz`, x + 5, graph.height - 5);
+            }
+        }
+
+        function printFilterValues(filter) {
+            const filterData = {
+                id: filter.id,
+                frequency: filter.frequency,
+                gain: parseFloat(filter.gain),
+                q: filter.q
+            };
+            console.log(JSON.stringify(filterData));
+        }
+
+        // Initialize
+        addFilter();  // Add the first filter by default
+        drawGrid();
+        drawAllCurves();
+    </script>
+</body>
+</html>
