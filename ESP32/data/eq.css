@@ -1,0 +1,17 @@
+canvas {
+    background-color: #222;
+    border: 1px solid black;
+}
+.slider-container {
+    margin-top: 20px;
+}
+.slider-container label {
+    display: inline-block;
+    width: 100px;
+}
+.slider-container input {
+    width: 300px;
+}
+.filter-container {
+    margin-bottom: 30px;
+}
