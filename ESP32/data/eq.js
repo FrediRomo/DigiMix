@@ -195,10 +195,11 @@ function drawResultingCurve()
  */
 function addFilter()
 {
-    //check for 5 fiter limit
+    //check if the max number of filters limit has been reached
     if (filters.length >= MAX_NUM_OF_FILTERS)
     {
         alert("Maximum number if filters reached");
+        console.error("Max number of filters reached, unable to add more");
         return;
     }
 
