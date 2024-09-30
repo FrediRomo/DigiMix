@@ -14,7 +14,7 @@ let printOnMove = false;
 
 const canvas = document.getElementById('graph');
 const ctx = canvas.getContext('2d');
-
+const MAX_NUM_OF_FILTERS = 5
 const graph = {
     width: canvas.width,
     height: canvas.height,
@@ -195,6 +195,13 @@ function drawResultingCurve()
  */
 function addFilter()
 {
+    //check for 5 fiter limit
+    if (filters.length >= MAX_NUM_OF_FILTERS)
+    {
+        alert("Maximum number if filters reached");
+        return;
+    }
+
     const filterId = filters.length;
 
     const filter = {
