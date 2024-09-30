@@ -1,5 +1,9 @@
 /**
  * FILE: eq.js
+ * 
+ * This file contains the implementation of a graphical equalizer using HTML5 canvas.
+ * The equalizer allows users to add, remove, and manipulate filters that adjust 
+ * the frequency response of an audio signal.
  */
 
 
@@ -20,6 +24,8 @@ const graph = {
     gainMax: 20
 };
 
+
+
 let filters = [];
 const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
 let selectedFilterIndex = null;
@@ -28,7 +34,12 @@ let isDragging = false;
 
 
 
-// Logarithmic frequency mapping
+/**
+ * Converts an x-coordinate on the canvas to a frequency value.
+ *
+ * @param {number} x - The x-coordinate on the canvas.
+ * @returns {number} The corresponding frequency value.
+ */
 function xToFreq(x) 
 {
     const logFreqMin = Math.log10(graph.freqMin);
@@ -37,6 +48,13 @@ function xToFreq(x)
     return Math.round(Math.pow(10, logFreq));  // Ensure frequency is integer
 }
 
+
+/**
+ * Converts a frequency value to an x-coordinate on the canvas.
+ *
+ * @param {number} freq - The frequency value to convert.
+ * @returns {number} The corresponding x-coordinate on the canvas.
+ */
 function freqToX(freq) 
 {
     const logFreqMin = Math.log10(graph.freqMin);
@@ -45,16 +63,37 @@ function freqToX(freq)
     return ((logFreq - logFreqMin) / (logFreqMax - logFreqMin)) * graph.width;
 }
 
+
+/**
+ * Converts a gain value to a y-coordinate on the canvas.
+ *
+ * @param {number} gain - The gain value to convert.
+ * @returns {number} The corresponding y-coordinate on the canvas.
+ */
 function gainToY(gain)
 {
     return (graph.height / 2) - ((gain / graph.gainMax) * (graph.height / 2));
 }
 
+
+/**
+ * Converts a y-coordinate on the canvas to a gain value.
+ *
+ * @param {number}  - The y-coordinate on the canvas.
+ * @returns {number} The corresponding gain value.
+ */
 function yToGain(y)
 {
-    return parseFloat((((graph.height / 2 - y) / (graph.height / 2)) * graph.gainMax).toFixed(1));  // Ensure gain has 1 decimal
+    return parseFloat((((graph.height / 2 - y) / (graph.height / 2)) * graph.gainMax).toFixed(1));  
+    // Ensure gain has 1 decimal
 }
 
+
+/**
+ * Draws the frequency response curve for a given filter.
+ *
+ * @param {Object} filter - The filter object containing frequency, gain, q, and color properties.
+ */
 function drawCurve(filter)
 {
     const { frequency, gain, q, color } = filter;
@@ -81,6 +120,12 @@ function drawCurve(filter)
     drawDot(filter);
 }
 
+
+/**
+ * Draws the dot representing a filter on the graph.
+ *
+ * @param {Object} filter - The filter object containing frequency, gain, and color properties.
+ */
 function drawDot(filter)
 {
     const { frequency, gain, color } = filter;
@@ -93,6 +138,11 @@ function drawDot(filter)
     ctx.fill();
 }
 
+
+
+/**
+ * Clears the canvas and redraws all filter curves and the grid.
+ */
 function drawAllCurves()
 {
     ctx.clearRect(0, 0, graph.width, graph.height);
@@ -107,6 +157,10 @@ function drawAllCurves()
     drawResultingCurve();
 }
 
+
+/**
+ * Draws the combined frequency response curve of all filters.
+ */
 function drawResultingCurve() 
 {
     ctx.strokeStyle = 'grey';
@@ -135,6 +189,10 @@ function drawResultingCurve()
     ctx.stroke();
 }
 
+
+/**
+ * Adds a new filter to the filters array and updates the UI.
+ */
 function addFilter()
 {
     const filterId = filters.length;
@@ -153,6 +211,12 @@ function addFilter()
     drawAllCurves();
 }
 
+
+/**
+ * Adds a filter option to the dropdown menu in the UI.
+ *
+ * @param {Object} filter - The filter object to add to the dropdown.
+ */
 function addFilterToDropdown(filter)
 {
     const filterSelect = document.getElementById('filterSelect');
@@ -163,6 +227,10 @@ function addFilterToDropdown(filter)
     filterSelect.value = filter.id; // Automatically select new filter
 }
 
+
+/**
+ * Removes the currently selected filter from the filters array and updates the UI.
+ */
 function removeFilter()
 {
     if (selectedFilterIndex !== null) {
@@ -195,6 +263,12 @@ function removeFilter()
     }
 }
 
+
+/**
+ * Selects a filter based on its ID and updates the UI.
+ *
+ * @param {number} id - The ID of the filter to select.
+ */
 function selectFilter(id)
 {
     selectedFilterIndex = id;
@@ -204,6 +278,10 @@ function selectFilter(id)
     drawAllCurves();
 }
 
+
+/**
+ * Handles changes to the filter dropdown menu and selects the appropriate filter.
+ */
 function onFilterDropdownChange()
 {
     const filterSelect = document.getElementById('filterSelect');
@@ -211,6 +289,10 @@ function onFilterDropdownChange()
     selectFilter(selectedId);
 }
 
+
+/**
+ * Updates the slider values based on the currently selected filter.
+ */
 function updateSliders()
 {
     if (selectedFilterIndex !== null) {
@@ -233,6 +315,10 @@ function updateSliders()
     }
 }
 
+
+/**
+ * Handles input changes on the frequency slider and updates the corresponding filter.
+ */
 document.getElementById('frequencySlider').oninput = function ()
 {
     if (selectedFilterIndex !== null) {
@@ -243,6 +329,10 @@ document.getElementById('frequencySlider').oninput = function ()
     }
 };
 
+
+/**
+ * Handles input changes on the gain slider and updates the corresponding filter.
+ */
 document.getElementById('gainSlider').oninput = function ()
 {
     if (selectedFilterIndex !== null) {
@@ -253,6 +343,10 @@ document.getElementById('gainSlider').oninput = function ()
     }
 };
 
+
+/**
+ * Handles input changes on the Q slider and updates the corresponding filter.
+ */
 document.getElementById('qSlider').oninput = function ()
 {
     if (selectedFilterIndex !== null) {
@@ -263,7 +357,13 @@ document.getElementById('qSlider').oninput = function ()
     }
 };
 
-// Mouse interaction for dragging filter dots
+
+
+/**
+ * Handles mouse down events on the canvas for filter dragging.
+ *
+ * @param {MouseEvent} event - The mouse event object.
+ */
 canvas.addEventListener('mousedown', function (e) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
@@ -282,6 +382,12 @@ canvas.addEventListener('mousedown', function (e) {
     });
 });
 
+
+/**
+ * Handles mouse move events on the canvas for filter dragging.
+ *
+ * @param {MouseEvent} event - The mouse event object.
+ */
 canvas.addEventListener('mousemove', function (e) {
     if (isDragging && draggingFilterIndex !== null) {
         const rect = canvas.getBoundingClientRect();
@@ -295,12 +401,17 @@ canvas.addEventListener('mousemove', function (e) {
         drawAllCurves();
         updateSliders();  // Update sliders when moving dot
 
-        if (printOnMove) {
+        if (printOnMove)
+        {
             printFilterValues(filter); // Print while moving
         }
     }
 });
 
+
+/**
+ * Handles mouse up events on the canvas to stop dragging filters.
+ */
 canvas.addEventListener('mouseup', function () {
     isDragging = false;
     if (draggingFilterIndex !== null && !printOnMove) {
@@ -309,6 +420,18 @@ canvas.addEventListener('mouseup', function () {
     draggingFilterIndex = null;
 });
 
+
+/**
+ * Handles mouse leave events on the canvas to stop dragging filters.
+ */
+canvas.onmouseleave = function () {
+    isDragging = false;
+    draggingFilterIndex = null;
+};
+
+/**
+ * Draws the grid on the canvas for better visual reference.
+ */
 function drawGrid()
 {
     ctx.strokeStyle = '#555';
