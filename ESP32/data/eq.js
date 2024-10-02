@@ -1,20 +1,29 @@
 /**
  * FILE: eq.js
  * 
+ * AUTHOR: Alfredo Romo
+ * 
  * This file contains the implementation of a graphical equalizer using HTML5 canvas.
  * The equalizer allows users to add, remove, and manipulate filters that adjust 
  * the frequency response of an audio signal.
+ * 
+ * Integrates Websocket  communication
  */
 
 
 
 // Choose to print when dragging the filter dot, or when finished dragging 
 let printOnMove = false;
-/******/
+
+
+// Constants
 
 const canvas = document.getElementById('graph');
 const ctx = canvas.getContext('2d');
+
+
 const MAX_NUM_OF_FILTERS = 5
+const colors = ['red', 'blue', 'green', 'orange', 'yellow'];
 const graph = {
     width: canvas.width,
     height: canvas.height,
@@ -26,8 +35,9 @@ const graph = {
 
 
 
+
+
 let filters = [];
-const colors = ['red', 'blue', 'green', 'orange', 'purple', 'yellow'];
 let selectedFilterIndex = null;
 let draggingFilterIndex = null;
 let isDragging = false;
@@ -364,7 +374,6 @@ document.getElementById('qSlider').oninput = function ()
         printFilterValues(filters[selectedFilterIndex]);
     }
 };
-
 
 
 /**
