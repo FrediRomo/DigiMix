@@ -37,7 +37,8 @@ const graph = {
     gainMax: 20
 };
 
-
+// Websocket object for multi-client connection
+const socket = new WebSocket('ws://localhost:5000');
 
 
 
@@ -347,7 +348,12 @@ document.getElementById('frequencySlider').oninput = function ()
         filters[selectedFilterIndex].frequency = parseInt(this.value);
         document.getElementById('frequencyValue').textContent = this.value + ' Hz';
         drawAllCurves();
+
+        //Send modified data to server
+        ws_sendFilterData(selectedFilterIndex);
         printFilterValues(filters[selectedFilterIndex]);
+
+
     }
 };
 
@@ -361,7 +367,11 @@ document.getElementById('gainSlider').oninput = function ()
         filters[selectedFilterIndex].gain = parseFloat(this.value);
         document.getElementById('gainValue').textContent = this.value + ' dB';
         drawAllCurves();
+
+        //Send modified data to server
+        ws_sendFilterData(selectedFilterIndex);
         printFilterValues(filters[selectedFilterIndex]);
+
     }
 };
 
@@ -375,6 +385,9 @@ document.getElementById('qSlider').oninput = function ()
         filters[selectedFilterIndex].q = parseFloat(this.value);
         document.getElementById('qValue').textContent = this.value;
         drawAllCurves();
+
+        //Send modified data to server
+        ws_sendFilterData(selectedFilterIndex);
         printFilterValues(filters[selectedFilterIndex]);
     }
 };
@@ -385,7 +398,8 @@ document.getElementById('qSlider').oninput = function ()
  *
  * @param {MouseEvent} event - The mouse event object.
  */
-canvas.addEventListener('mousedown', function (e) {
+canvas.addEventListener('mousedown', function (e)
+{
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -397,7 +411,7 @@ canvas.addEventListener('mousedown', function (e) {
         const dist = Math.sqrt(Math.pow(mouseX - dotX, 2) + Math.pow(mouseY - dotY, 2));
         if (dist < 8) {
             draggingFilterIndex = index;
-            selectFilter(index);  // Update selected filter when dot is clicked
+            selectFilter(index);  // Update selected filter index when dot is clicked
             isDragging = true;
         }
     });
@@ -409,7 +423,8 @@ canvas.addEventListener('mousedown', function (e) {
  *
  * @param {MouseEvent} event - The mouse event object.
  */
-canvas.addEventListener('mousemove', function (e) {
+canvas.addEventListener('mousemove', function (e)
+{
     if (isDragging && draggingFilterIndex !== null) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = e.clientX - rect.left;
@@ -433,10 +448,15 @@ canvas.addEventListener('mousemove', function (e) {
 /**
  * Handles mouse up events on the canvas to stop dragging filters.
  */
-canvas.addEventListener('mouseup', function () {
+canvas.addEventListener('mouseup', function () 
+{
     isDragging = false;
     if (draggingFilterIndex !== null && !printOnMove) {
         printFilterValues(filters[draggingFilterIndex]); // Print after releasing the mouse button
+
+        //Send data to server
+        ws_sendFilterData(selectedFilterIndex);
+
     }
     draggingFilterIndex = null;
 });
@@ -445,10 +465,77 @@ canvas.addEventListener('mouseup', function () {
 /**
  * Handles mouse leave events on the canvas to stop dragging filters.
  */
-canvas.onmouseleave = function () {
+canvas.onmouseleave = function () 
+{
     isDragging = false;
     draggingFilterIndex = null;
 };
+
+
+/**
+ * Event listener whenen websockets conncection is opened
+ */
+socket.addEventListener('open', function(event)
+{
+    console.log("Websocket connection opened!");
+})
+
+/**
+ * Event listener when a websocket message is recieved from server
+ * 
+ */
+socket.addEventListener('message', function (event) {
+    console.log('Message from server:', event.data);
+    const receivedData = JSON.parse(event.data);
+    
+    // Update filters with received data
+    filters = receivedData.filters;
+    
+    // Update the UI and redraw curves based on new filter data
+    updateSliders();
+    drawAllCurves();
+});
+
+
+/**
+ * Sends data of a specific filter to the WebSocket server.
+ *
+ * @param {number} filterIndex - The index of the filter to send.
+ */
+function ws_sendFilterData(filterIndex) 
+{
+    // Check if index is in the valid range of existing filters
+    if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length)
+    {
+        const filter = filters[filterIndex];
+        const data = {
+            id: filter.id,
+            frequency: filter.frequency,
+            gain: filter.gain,
+            q: filter.q
+    }
+        
+        // Send the data to the WebSocket server
+
+        //Check if websockets connection is ready to send
+        if (socket && socket.readyState === WebSocket.OPEN)
+        {
+            socket.send(JSON.stringify(data));
+            console.log("Data sent:", data);
+        } 
+        else 
+        {
+            console.error("WebSocket is not open.");
+        }
+    } 
+    else
+    {
+        console.error("Invalid filter index.");
+    }
+}
+
+
+
 
 /**
  * Draws the grid on the canvas for better visual reference.
