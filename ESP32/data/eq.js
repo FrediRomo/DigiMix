@@ -16,14 +16,18 @@
 let printOnMove = false;
 
 
-// Constants
 
+// Canvas elements on the HTML body
 const canvas = document.getElementById('graph');
 const ctx = canvas.getContext('2d');
 
-
+// Maximun number of filters that can be created
 const MAX_NUM_OF_FILTERS = 5
+
+// Array to store availanble colors for filters
 const colors = ['red', 'blue', 'green', 'orange', 'yellow'];
+
+// Graph object containing 
 const graph = {
     width: canvas.width,
     height: canvas.height,
@@ -37,10 +41,10 @@ const graph = {
 
 
 
-let filters = [];
-let selectedFilterIndex = null;
-let draggingFilterIndex = null;
-let isDragging = false;
+let filters = [];                // Array to store filter objects
+let selectedFilterIndex = null;  // Array index of currently selected filter
+let draggingFilterIndex = null;  // Array index of the filter that is currently beign dragged
+let isDragging = false;          // Flag to know when a filter is beign currently dragged
 
 
 
