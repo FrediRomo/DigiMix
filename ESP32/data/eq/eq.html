@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigiMix EQ</title>
+    <link rel="stylesheet" href="eq.css">
+</head>
+<body>
+    <canvas id="graph" width="800" height="400"></canvas>
+
+    <div class="filter-container">
+        <label for="filterSelect">Select Filter: </label>
+        <select id="filterSelect" onchange="onFilterDropdownChange()"></select>
+    </div>
+
+    <div id="controls">
+        <div class="slider-container">
+            <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
+            <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1">
+        </div>
+        <div class="slider-container">
+            <label>Gain: <span id="gainValue">0 dB</span></label>
+            <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1">
+        </div>
+        <div class="slider-container">
+            <label>Q: <span id="qValue">1.0</span></label>
+            <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05">
+        </div>
+    </div>
+
+    <button onclick="addFilter()">Add Filter</button>
+    <button onclick="removeFilter()">Remove Filter</button>
+
+    <script src="eq.js">    </script>
+</body>
+</html>
