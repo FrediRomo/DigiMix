@@ -1,63 +1,123 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    margin: 0; /* Elimina el margen predeterminado de todos los elementos */
+    padding: 0; /* Elimina el relleno predeterminado de todos los elementos */
+    box-sizing: border-box; /* Hace que el ancho y alto incluyan el relleno y el borde */
 }
 
 body {
-    background-color: #121212;
-    font-family: Arial, sans-serif;
-    color: white;
+    background-color: #121212; /* Color de fondo oscuro para la página */
+    font-family: Arial, sans-serif; /* Tipografía para el cuerpo del texto */
+    color: white; /* Color del texto blanco */
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+    display: flex; /* Usa Flexbox para organizar los elementos hijos */
+    flex-direction: column; /* Coloca los elementos en una columna */
+    height: 100vh; /* Altura del contenedor igual a la altura de la ventana del navegador */
 }
 
 .header {
-    background-color: #1E1E1E;
-    padding: 10px;
-    text-align: center;
+    background-color: #1E1E1E; /* Color de fondo del encabezado */
+    padding: 10px; /* Espaciado interno en el encabezado */
+    text-align: center; /* Centra el texto del encabezado */
 }
 
-.main-content {
-    flex: 1;
-    background-color: #0C444D;
-    padding: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.upper-content {
+    flex: 1; /* Permite que esta sección ocupe el espacio restante disponible */
+    background-color: #0C444D; /* Color de fondo para la sección principal */
+    padding: 15px; /* Espaciado interno en la sección principal */
+    display: flex; /* Usa Flexbox para organizar los elementos hijos */
+    justify-content: center; /* Centra horizontalmente los elementos hijos */
+    align-items: center; /* Centra verticalmente los elementos hijos */
 }
 
 .upper-box {
-    width: 97%; /* Set a fixed width based on the image */
-    height: 400px; /* Set a fixed height based on the image */
-    background-color: #256b74;
-    border: 2px solid #00CFFF;
-    position: relative;
-    border-radius: 5px;
+    width: 97%; /* Ancho de la caja superior */
+    height: 400px; /* Altura de la caja superior */
+    background-color: #256b74; /* Color de fondo de la caja superior */
+    border: 2px solid #00CFFF; /* Borde azul alrededor de la caja superior */
+    position: relative; /* Posicionamiento relativo para los elementos hijos */
+    border-radius: 5px; /* Bordes redondeados para la caja */
 }
 
 .small-box {
-    width: 125px;
-    height: 30px;
-    background-color: #00CFFF;
-    position: absolute;
-    top: 10px;
-    left: 10px;
+    width: 125px; /* Ancho de la caja pequeña */
+    height: 30px; /* Altura de la caja pequeña */
+    background-color: #00CFFF; /* Color de fondo de la caja pequeña */
+    position: absolute; /* Posicionamiento absoluto dentro de la caja superior */
+    top: 10px; /* Espaciado desde la parte superior */
+    left: 10px; /* Espaciado desde la izquierda */
+    text-align: center; /* Centra el texto del encabezado */
+}
+
+.lower-content {
+    flex: 1; /* Permite que esta sección ocupe el espacio restante disponible */
+    background-color: #0A0B10; /* Color de fondo de la caja superior */
+    padding: 15px; /* Espaciado interno en la sección principal */
+    display: flex; /* Usa Flexbox para organizar los elementos hijos */
+    justify-content: center; /* Centra horizontalmente los elementos hijos */
+    align-items: center; /* Centra verticalmente los elementos hijos */
+}
+
+.lower-box {
+    width: 97%; /* Ancho de la caja superior */
+    height: 400; /* Altura de la caja superior */
+    background-color: #1A1B1F; /* Color de fondo de la caja superior */
+    position: relative; /* Posicionamiento relativo para los elementos hijos */
+    border-radius: 5px; /* Bordes redondeados para la caja */
 }
 
 .bottom-boxes {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px;
-    background-color: #1E1E1E;
+    display: flex; /* Usa Flexbox para organizar las cajas inferiores */
+    justify-content: space-around; /* Espacia las cajas uniformemente a lo largo de la línea */
+    padding: 20px; /* Espaciado interno en la sección de cajas inferiores */
+    background-color: #1A1B1F; /* Color de fondo para las cajas inferiores */
 }
 
 .bottom-box {
-    width: 32%;
-    height: 450px;
-    background-color: #252525;
+    width: 6%;
+    height: 480px;
+    background-color: #26272D;
+    text-align: center; /* Centra el texto del encabezado */
+}
+
+.eq-btn {
+    background-color: #252525; /* Color de fondo del botón EQ */
+    border: 2px solid white; /* Sin borde alrededor del botón */
+    padding: 5px 10px; /* Espaciado interno del botón */
+    color: white; /* Color del texto del botón */
+    padding: 5px 8px; /* Espaciado interno del botón */
+    margin-top: 10px; /* Espaciado superior del botón */
+    border-radius: 5px; /* Bordes redondeados para el botón */
+}
+
+.fader-container {
+    position: 0; /* Posicionamiento relativo para los elementos hijos */
+    height: 320px; /* Altura del contenedor del fader */
+    width: 10px; /* Ancho del contenedor del fader */
+    margin: 0 auto; /* Centra el contenedor horizontalmente */
+    background: linear-gradient(to top, green, yellow, red); /* Degradado de colores para el fader */
+    border-radius: 0px; /* Bordes redondeados para el contenedor del fader */
+    padding: 5px; /* Espaciado interno en el contenedor del fader */
+}
+
+.fader {
+    -webkit-appearance: none; /* Elimina el estilo predeterminado del slider en WebKit */
+    appearance: none; /* Elimina el estilo predeterminado del slider */
+    width: 150px; /* Ancho del fader */
+    height: 30px; /* Altura del fader */
+    background: transparent; /* Fondo transparente para el fader */
+    outline: none; /* Elimina el contorno alrededor del fader */
+    transform: rotate(-90deg); /* Rota el slider para que esté vertical */
+    position: relative; /* Posicionamiento relativo para el fader */
+    margin-left: -50px; /* Ajusta la posición para centrar el fader */
+}
+
+.mute-btn {
+    background-color: #252525; /* Color de fondo del botón de silenciar */
+    border: 2px solid rgb(171, 11, 11); /* Sin borde alrededor del botón */
+    color: rgb(171, 11, 11); /* Color del texto del botón */
+    padding: 5px 8px; /* Espaciado interno del botón */
+    margin-top: 10px; /* Espaciado superior del botón */
+    border-radius: 5px; /* Bordes redondeados para el botón */
 }

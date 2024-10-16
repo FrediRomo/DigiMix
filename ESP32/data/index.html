@@ -11,9 +11,9 @@
         <div class="header">
             <h1>DigiMix</h1>
         </div>
-        <div class="main-content">
+        <div class="upper-content">
             <div class="upper-box">
-                <div class="small-box"><h3>Channel 1</h3></div>
+                <div class="small-box"><h3><span style="color:#256b74"> Channel 1 </span> </h3></div>
                 <form>
                     <br><br>
                     <br><br>
@@ -38,11 +38,83 @@
                 </form>
             </div>
         </div>
-        <div class="bottom-boxes">
-            <div class="bottom-box"></div>
-            <div class="bottom-box"></div>
-            <div class="bottom-box"></div>
+        <div class="lower-content">
+            <div class="lower-box">
+                <div class="bottom-boxes"> <!-- Sección para controles de faders de los canales -->
+                    <!-- Faders de canales con EQ -->
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Ch 1</h3> <!-- Título para el canal 1 -->
+                        <br>
+                        <button class="eq-btn">EQ</button> <!-- Botón para ajustar ecualizador -->
+                        <div class="fader-container"> <!-- Contenedor para el fader -->
+                            <input type="range" class="fader" min="0" max="100" value="50"> <!-- Fader para controlar el volumen -->
+                            <div class="fader-indicator"></div> <!-- Indicador del fader -->
+                        </div>
+                        <button class="mute-btn">MUTE</button> <!-- Botón para silenciar el canal -->
+                    </div>
+
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Ch 2</h3> <!-- Título para el canal 2 -->
+                        <br>
+                        <button class="eq-btn">EQ</button>
+                        <div class="fader-container">
+                            <input type="range" class="fader" min="0" max="100" value="50">
+                            <div class="fader-indicator"></div>
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Ch 3</h3> <!-- Título para el canal 3 -->
+                        <br>
+                        <button class="eq-btn">EQ</button>
+                        <div class="fader-container">
+                            <input type="range" class="fader" min="0" max="100" value="50">
+                            <div class="fader-indicator"></div>
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Ch 4</h3> <!-- Título para el canal 4 -->
+                        <br>
+                        <button class="eq-btn">EQ</button>
+                        <div class="fader-container">
+                            <input type="range" class="fader" min="0" max="100" value="50">
+                            <div class="fader-indicator"></div>
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Left</h3> <!-- Título para el altavoz izquierdo -->
+                        <br><br>
+                        <br>
+                        <div class="fader-container">
+                            <input type="range" class="fader" min="0" max="100" value="50">
+                            <div class="fader-indicator"></div>
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+
+                    <div class="bottom-box">
+                        <br>
+                        <h3>Right</h3> <!-- Título para el altavoz izquierdo -->
+                        <br><br>
+                        <br>
+                        <div class="fader-container">
+                            <input type="range" class="fader" min="0" max="100" value="50">
+                            <div class="fader-indicator"></div>
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</body>
-</html>
+    </body>
+    </html>
