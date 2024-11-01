@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DigiMix</title>
-    <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -38,83 +38,121 @@
                 </form>
             </div>
         </div>
+        <!-------------------------Nuevo------------------------->
         <div class="lower-content">
             <div class="lower-box">
-                <div class="bottom-boxes"> <!-- Sección para controles de faders de los canales -->
-                    <!-- Faders de canales con EQ -->
+                <div class="bottom-boxes">
+                    <!-- Canal 1 -->
                     <div class="bottom-box">
-                        <br>
-                        <h3>Ch 1</h3> <!-- Título para el canal 1 -->
-                        <br>
-                        <button class="eq-btn">EQ</button> <!-- Botón para ajustar ecualizador -->
-                        <div class="fader-container"> <!-- Contenedor para el fader -->
-                            <input type="range" class="fader" min="0" max="100" value="50"> <!-- Fader para controlar el volumen -->
-                            <div class="fader-indicator"></div> <!-- Indicador del fader -->
-                        </div>
-                        <button class="mute-btn">MUTE</button> <!-- Botón para silenciar el canal -->
-                    </div>
-
-                    <div class="bottom-box">
-                        <br>
-                        <h3>Ch 2</h3> <!-- Título para el canal 2 -->
-                        <br>
+                        <h3>Ch 1</h3>
                         <button class="eq-btn">EQ</button>
-                        <div class="fader-container">
-                            <input type="range" class="fader" min="0" max="100" value="50">
-                            <div class="fader-indicator"></div>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line1"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb1">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number1">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input1" min="0" max="100" value="50" step="1">
                         </div>
                         <button class="mute-btn">MUTE</button>
                     </div>
 
+                    <!-- Canal 2 -->
                     <div class="bottom-box">
-                        <br>
-                        <h3>Ch 3</h3> <!-- Título para el canal 3 -->
-                        <br>
+                        <h3>Ch 2</h3>
                         <button class="eq-btn">EQ</button>
-                        <div class="fader-container">
-                            <input type="range" class="fader" min="0" max="100" value="50">
-                            <div class="fader-indicator"></div>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line2"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb2">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number2">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input2" min="0" max="100" value="50" step="1">
                         </div>
                         <button class="mute-btn">MUTE</button>
                     </div>
 
+                    <!-- Canal 3 -->
                     <div class="bottom-box">
-                        <br>
-                        <h3>Ch 4</h3> <!-- Título para el canal 4 -->
-                        <br>
+                        <h3>Ch 3</h3>
                         <button class="eq-btn">EQ</button>
-                        <div class="fader-container">
-                            <input type="range" class="fader" min="0" max="100" value="50">
-                            <div class="fader-indicator"></div>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line3"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb3">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number3">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input3" min="0" max="100" value="50" step="1">
                         </div>
                         <button class="mute-btn">MUTE</button>
                     </div>
 
+                    <!-- Canal 4 -->
                     <div class="bottom-box">
-                        <br>
-                        <h3>Left</h3> <!-- Título para el altavoz izquierdo -->
-                        <br><br>
-                        <br>
-                        <div class="fader-container">
-                            <input type="range" class="fader" min="0" max="100" value="50">
-                            <div class="fader-indicator"></div>
+                        <h3>Ch 4</h3>
+                        <button class="eq-btn">EQ</button>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line4"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb4">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number4">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input4" min="0" max="100" value="50" step="1">
                         </div>
                         <button class="mute-btn">MUTE</button>
                     </div>
 
+                    <!-- Canal Derecho -->
                     <div class="bottom-box">
-                        <br>
-                        <h3>Right</h3> <!-- Título para el altavoz izquierdo -->
-                        <br><br>
-                        <br>
-                        <div class="fader-container">
-                            <input type="range" class="fader" min="0" max="100" value="50">
-                            <div class="fader-indicator"></div>
+                        <h3>Right</h3>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line-right"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb-right">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number-right">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input-right" min="0" max="100" value="50" step="1">
                         </div>
                         <button class="mute-btn">MUTE</button>
                     </div>
+
+                    <!-- Canal Izquierdo -->
+                    <div class="bottom-box">
+                        <h3>Left</h3>
+                        <div class="range__content">
+                            <div class="range__slider">
+                                <div class="range__slider-line" id="range-line-left"></div>
+                            </div>
+                            <div class="range__thumb" id="range-thumb-left">
+                                <div class="range__value">
+                                    <span class="range__value-number" id="range-number-left">50</span>
+                                </div>
+                            </div>
+                            <input type="range" class="range__input" id="range-input-left" min="0" max="100" value="50" step="1">
+                        </div>
+                        <button class="mute-btn">MUTE</button>
+                    </div>
+
                 </div>
             </div>
         </div>
-    </body>
-    </html>
+    </div>
+    <!--=============== MAIN JS ===============-->
+    <script src="main.js"></script>
+</body>
+</html>
