@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DigiMix</title>
+
+<!--=============== Achivos Css ===============-->
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,39 +15,75 @@
         </div>
         <div class="upper-content">
             <div class="upper-box">
-                <div class="small-box"><h3><span style="color:#256b74"> Channel 1 </span> </h3></div>
-                <form>
-                    <br><br>
-                    <br><br>
-                    <label for="Filter"><h4>Select Filter</label>
-                    <input id="Filter" name="Filter" placeholder="Filter"/>
-            
-                    <p>Frequancy:</h4></p>
-                    <br><br>
-                    <p>000 Hz</p>
-                    <h4>Gain:</h4>
-                    <br><br>
-                    <p>00.0 dB</p>
-                    <h4>Q:</h4>
-                    <br><br>
-                    <p>00.00</p>
-                    <br>
-            
-                    <button type="button">Add Filter</button>
-                    <button type="button">Remove Filter</button>
-                    <br><br>
-                    <button type="reset">Reset Filter</button>
-                </form>
+
+                <!--Lado izquierdo para la modificación de las señales de EQ-->
+                <div class="lado-izquierdo">
+                    <div class="parte-superior">
+                        <div class="small-box">
+                            <h3><span style="color:#256b74"> Channel 1 </span></h3>
+                        </div>
+                    </div>
+
+                    <div class="parte-inferior">
+                        <!--Selección de Filtros-->
+                        <div class="filter-container">
+                            <label for="filterSelect">Select Filter: </label>
+                            <select id="filterSelect" onchange="onFilterDropdownChange()"></select>
+                        </div>
+
+                        <!--Manipulación de señales-->
+                        <div id="controls">
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
+                                <br>
+                                <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1">
+                            </div>
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Gain: <span id="gainValue">0 dB</span></label>
+                                <br>
+                                <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1">
+                            </div>
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Q: <span id="qValue">1.0</span></label>
+                                <br>
+                                <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05">
+                            </div>
+                        </div>
+
+                        <br><br>
+                        <!--Creación y eliminación de filtros-->
+                        <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
+                        <button class="add_remove-btn" onclick="addFilter()"> Add Filter </button>
+                        <button class="add_remove-btn" onclick="removeFilter()"> Remove Filter </button>
+                    </div>
+                </div>
+
+                <!--Lado derecho del cuadro celeste con la tabla del EQ-->
+                <div class="lado-derecho">
+                    <div class="parte-superior"></div>
+                    <div class="pare-inferior">
+                        <canvas id="graph" width="800" height="400"></canvas>
+                    </div>
+                </div>
+                
+                <!--=============== Achivo Java ===============-->
+                <script src="eq.js"></script>
             </div>
         </div>
-        <!-------------------------Nuevo------------------------->
+        <!-------------------------Faders------------------------->
         <div class="lower-content">
             <div class="lower-box">
                 <div class="bottom-boxes">
                     <!-- Canal 1 -->
                     <div class="bottom-box">
                         <h3>Ch 1</h3>
-                        <button class="eq-btn">EQ</button>
+                        <!--On & Off del botón EQ-->
+                        <button class="eq-btn" onclick="eqFilter()" id="eq-button1">EQ</button>
+
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line1"></div>
@@ -57,13 +95,20 @@
                             </div>
                             <input type="range" class="range__input" id="range-input1" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <!--<button class="mute-btn" onclick="" id="mute-button1">MUTE</button>-->
+
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>
                     </div>
 
                     <!-- Canal 2 -->
                     <div class="bottom-box">
                         <h3>Ch 2</h3>
-                        <button class="eq-btn">EQ</button>
+                        <!--On & Off del botón EQ-->
+                        <button class="eq-btn" onclick="eqFilter()" id="eq-button2">EQ</button>
+
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line2"></div>
@@ -75,13 +120,18 @@
                             </div>
                             <input type="range" class="range__input" id="range-input2" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button2">MUTE</button>
                     </div>
 
                     <!-- Canal 3 -->
                     <div class="bottom-box">
                         <h3>Ch 3</h3>
-                        <button class="eq-btn">EQ</button>
+                        <!--On & Off del botón EQ-->
+                        <button class="eq-btn" onclick="eqFilter()" id="eq-button3">EQ</button>
+
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line3"></div>
@@ -93,13 +143,18 @@
                             </div>
                             <input type="range" class="range__input" id="range-input3" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button3">MUTE</button>
                     </div>
 
                     <!-- Canal 4 -->
                     <div class="bottom-box">
                         <h3>Ch 4</h3>
-                        <button class="eq-btn">EQ</button>
+                        <!--On & Off del botón EQ-->
+                        <button class="eq-btn" onclick="eqFilter()" id="eq-button4">EQ</button>
+
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line4"></div>
@@ -111,12 +166,15 @@
                             </div>
                             <input type="range" class="range__input" id="range-input4" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button4">MUTE</button>
                     </div>
 
                     <!-- Canal Derecho -->
                     <div class="bottom-box">
                         <h3>Right</h3>
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line-right"></div>
@@ -128,12 +186,15 @@
                             </div>
                             <input type="range" class="range__input" id="range-input-right" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button-right">MUTE</button>
                     </div>
 
                     <!-- Canal Izquierdo -->
                     <div class="bottom-box">
                         <h3>Left</h3>
+                        <!--Manipulación del slider para la salida de los faders-->
                         <div class="range__content">
                             <div class="range__slider">
                                 <div class="range__slider-line" id="range-line-left"></div>
@@ -145,14 +206,16 @@
                             </div>
                             <input type="range" class="range__input" id="range-input-left" min="0" max="100" value="50" step="1">
                         </div>
-                        <button class="mute-btn">MUTE</button>
+
+                        <!--On & Off del botón Mute-->
+                        <button class="mute-btn" onclick="muteFilter()" id="mute-button-left">MUTE</button>
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
-    <!--=============== MAIN JS ===============-->
+    <!--=============== Achivo Java ===============-->
     <script src="main.js"></script>
 </body>
 </html>
