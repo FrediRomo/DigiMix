@@ -56,7 +56,7 @@ setupRangeSlider('range-thumb-right', 'range-number-right', 'range-lineright', '
 setupRangeSlider('range-thumb-left', 'range-number-left', 'range-line-left', 'range-input-left', 'mute-button-left');
 
 /********************************************************************************************************************************/
-
+/*
 const eqWindows = {
     channel1: null,
     channel2: null,
@@ -171,4 +171,4 @@ function eqFilter(channel) {
 
     // Cambiar el estado del botón a activado
     eqButton.classList.add('active');
-}
+}*/
