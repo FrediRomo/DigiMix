@@ -29,12 +29,75 @@
                     <div class="parte-inferior">
                         <!--Selección de Filtros-->
                         <div class="filter-container">
+                            <label for="filterSelect">Select Filter: </label>
+                            <select id="filterSelect" onchange="onFilterDropdownChange()"></select>
+                        </div>
+
+                        <!--Manipulación de señales-->
+                        <div id="controls">
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
+                                <br>
+                                <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1">
+                            </div>
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Gain: <span id="gainValue">0 dB</span></label>
+                                <br>
+                                <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1">
+                            </div>
+                            <br><br>
+                            <div class="slider-container">
+                                <label>Q: <span id="qValue">1.0</span></label>
+                                <br>
+                                <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05">
+                            </div>
+                        </div>
+
+                        <br><br>
+                        <!--Creación y eliminación de filtros-->
+                        <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
+                        <button class="add_remove-btn" onclick="addFilter()"> Add Filter </button>
+                        <button class="add_remove-btn" onclick="removeFilter()"> Remove Filter </button>
+                    
+                    </div>
+                </div>
+
+                <!--Lado derecho del cuadro celeste con la tabla del EQ-->
+                <div class="lado-derecho">
+                    <div class="parte-superior"></div>
+                    <div class="pare-inferior">
+                        <!-- width="800" height="400"-->
+                        <canvas id="graph" width="800" height="400"></canvas>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+
+        <!--Canal 2-->
+        <div class="upper-content">
+            <div class="upper-box">
+
+                <!--Lado izquierdo para la modificación de las señales de EQ-->
+                <div class="lado-izquierdo">
+                    <div class="parte-superior">
+                        <div class="small-box">
+                            <h3><span style="color:#256b74"> Channel 2 </span></h3>
+                        </div>
+                    </div>
+
+                    <div class="parte-inferior">
+                        <!--Selección de Filtros-->
+                        <div class="filter-container">
                             <label for="filterSelect1">Select Filter: </label>
                             <select id="filterSelect1" onchange="onFilterDropdownChange1()"></select>
                         </div>
 
                         <!--Manipulación de señales-->
-                        <div id="controls">
+                        <div id="controls1">
                             <br><br>
                             <div class="slider-container">
                                 <label>Frequency: <span id="frequencyValue1">1000 Hz</span></label>
@@ -75,193 +138,6 @@
                 
             </div>
         </div>
-
-        <!--Canal 2-->
-        <div class="upper-content">
-            <div class="upper-box">
-
-                <!--Lado izquierdo para la modificación de las señales de EQ-->
-                <div class="lado-izquierdo">
-                    <div class="parte-superior">
-                        <div class="small-box">
-                            <h3><span style="color:#256b74"> Channel 2 </span></h3>
-                        </div>
-                    </div>
-
-                    <div class="parte-inferior">
-                        <!--Selección de Filtros-->
-                        <div class="filter-container">
-                            <label for="filterSelect2">Select Filter: </label>
-                            <select id="filterSelect2" onchange="onFilterDropdownChange2()"></select>
-                        </div>
-
-                        <!--Manipulación de señales-->
-                        <div id="controls">
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Frequency: <span id="frequencyValue2">1000 Hz</span></label>
-                                <br>
-                                <input type="range" id="frequencySlider2" min="20" max="20000" value="1000" step="1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Gain: <span id="gainValue2">0 dB</span></label>
-                                <br>
-                                <input type="range" id="gainSlider2" min="-20" max="20" value="0" step="0.1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Q: <span id="qValue2">1.0</span></label>
-                                <br>
-                                <input type="range" id="qSlider2" min="0.05" max="10" value="1" step="0.05">
-                            </div>
-                        </div>
-
-                        <br><br>
-                        <!--Creación y eliminación de filtros-->
-                        <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
-                        <button class="add_remove-btn" onclick="addFilter2()"> Add Filter </button>
-                        <button class="add_remove-btn" onclick="removeFilter2()"> Remove Filter </button>
-                    
-                    </div>
-                </div>
-
-                <!--Lado derecho del cuadro celeste con la tabla del EQ-->
-                <div class="lado-derecho">
-                    <div class="parte-superior"></div>
-                    <div class="pare-inferior">
-                        <!-- width="800" height="400"-->
-                        <canvas id="graph2" width="800" height="400"></canvas>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-
-        <!--Canal 3-->
-        <div class="upper-content">
-            <div class="upper-box">
-
-                <!--Lado izquierdo para la modificación de las señales de EQ-->
-                <div class="lado-izquierdo">
-                    <div class="parte-superior">
-                        <div class="small-box">
-                            <h3><span style="color:#256b74"> Channel 3 </span></h3>
-                        </div>
-                    </div>
-
-                    <div class="parte-inferior">
-                        <!--Selección de Filtros-->
-                        <div class="filter-container">
-                            <label for="filterSelect3">Select Filter: </label>
-                            <select id="filterSelect3" onchange="onFilterDropdownChange3()"></select>
-                        </div>
-
-                        <!--Manipulación de señales-->
-                        <div id="controls">
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Frequency: <span id="frequencyValue3">1000 Hz</span></label>
-                                <br>
-                                <input type="range" id="frequencySlider3" min="20" max="20000" value="1000" step="1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Gain: <span id="gainValue3">0 dB</span></label>
-                                <br>
-                                <input type="range" id="gainSlider3" min="-20" max="20" value="0" step="0.1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Q: <span id="qValue3">1.0</span></label>
-                                <br>
-                                <input type="range" id="qSlider3" min="0.05" max="10" value="1" step="0.05">
-                            </div>
-                        </div>
-
-                        <br><br>
-                        <!--Creación y eliminación de filtros-->
-                        <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
-                        <button class="add_remove-btn" onclick="addFilter3()"> Add Filter </button>
-                        <button class="add_remove-btn" onclick="removeFilter3()"> Remove Filter </button>
-                    
-                    </div>
-                </div>
-
-                <!--Lado derecho del cuadro celeste con la tabla del EQ-->
-                <div class="lado-derecho">
-                    <div class="parte-superior"></div>
-                    <div class="pare-inferior">
-                        <!-- width="800" height="400"-->
-                        <canvas id="graph3" width="800" height="400"></canvas>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-
-        <!--Canal 4-->
-        <div class="upper-content">
-            <div class="upper-box">
-
-                <!--Lado izquierdo para la modificación de las señales de EQ-->
-                <div class="lado-izquierdo">
-                    <div class="parte-superior">
-                        <div class="small-box">
-                            <h3><span style="color:#256b74"> Channel 4 </span></h3>
-                        </div>
-                    </div>
-
-                    <div class="parte-inferior">
-                        <!--Selección de Filtros-->
-                        <div class="filter-container">
-                            <label for="filterSelect4">Select Filter: </label>
-                            <select id="filterSelect4" onchange="onFilterDropdownChange4()"></select>
-                        </div>
-
-                        <!--Manipulación de señales-->
-                        <div id="controls">
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Frequency: <span id="frequencyValue4">1000 Hz</span></label>
-                                <br>
-                                <input type="range" id="frequencySlider4" min="20" max="20000" value="1000" step="1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Gain: <span id="gainValue4">0 dB</span></label>
-                                <br>
-                                <input type="range" id="gainSlider4" min="-20" max="20" value="0" step="0.1">
-                            </div>
-                            <br><br>
-                            <div class="slider-container">
-                                <label>Q: <span id="qValue4">1.0</span></label>
-                                <br>
-                                <input type="range" id="qSlider4" min="0.05" max="10" value="1" step="0.05">
-                            </div>
-                        </div>
-
-                        <br><br>
-                        <!--Creación y eliminación de filtros-->
-                        <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
-                        <button class="add_remove-btn" onclick="addFilter4()"> Add Filter </button>
-                        <button class="add_remove-btn" onclick="removeFilter4()"> Remove Filter </button>
-                    
-                    </div>
-                </div>
-
-                <!--Lado derecho del cuadro celeste con la tabla del EQ-->
-                <div class="lado-derecho">
-                    <div class="parte-superior"></div>
-                    <div class="pare-inferior">
-                        <!-- width="800" height="400"-->
-                        <canvas id="graph4" width="800" height="400"></canvas>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-
         
         <!-------------------------Faders------------------------->
         <div class="lower-content">
