@@ -78,49 +78,89 @@ function eqFilter(channel) {
     }
 
     // Crear una nueva ventana si no está abierta
-    eqWindows[channelKey] = window.open("", `Channel${channel}EQ`, "width=800,height=600");
+    eqWindows[channelKey] = window.open("", `Channel${channel}EQ`, "width=1200,height=600");
 
     // Definir el contenido HTML de la nueva ventana
     eqWindows[channelKey].document.write(`
         <html>
         <head>
-            <title>EQ Channel ${channel}</title>
-            <link rel="stylesheet" href="styles.css">
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>DigiMix Proofs</title>
+
+        <!--=============== Achivos Css ===============-->
+        <link rel="stylesheet" href="styles.css">
         </head>
+
         <body>
-            <h2>Equalizer for Channel ${channel}</h2>
-            
-            <!-- Selección de Filtros -->
-            <div class="filter-container">
-                <label for="filterSelect">Select Filter: </label>
-                <select id="filterSelect" onchange="onFilterDropdownChange()"></select>
-            </div>
+            <div class="container">
+                <!--Canal 1-->
+                <div class="upper-content">
+                    <div class="upper-box">
 
-            <!-- Controles de Filtros -->
-            <div id="controls">
-                <div class="slider-container">
-                    <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
-                    <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1" onchange="updateFrequency()">
-                </div>
-                <div class="slider-container">
-                    <label>Gain: <span id="gainValue">0 dB</span></label>
-                    <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1" onchange="updateGain()">
-                </div>
-                <div class="slider-container">
-                    <label>Q: <span id="qValue">1.0</span></label>
-                    <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05" onchange="updateQ()">
+                        <!--Lado izquierdo para la modificación de las señales de EQ-->
+                        <div class="lado-izquierdo">
+                            <div class="parte-superior">
+                                <div class="small-box">
+                                    <h3><span style="color:#256b74"> Channel ${channel} </span></h3>
+                                </div>
+                            </div>
+
+                            <div class="parte-inferior">
+                                <!--Selección de Filtros-->
+                                <div class="filter-container">
+                                    <label for="filterSelect">Select Filter: </label>
+                                    <select id="filterSelect" onchange="onFilterDropdownChange1()"></select>
+                                </div>
+
+                                <!--Manipulación de señales-->
+                                <div id="controls">
+                                    <br><br>
+                                    <div class="slider-container">
+                                        <label>Frequency: <span id="frequencyValue">1000 Hz</span></label>
+                                        <br>
+                                        <input type="range" id="frequencySlider" min="20" max="20000" value="1000" step="1">
+                                    </div>
+                                    <br><br>
+                                    <div class="slider-container">
+                                        <label>Gain: <span id="gainValue">0 dB</span></label>
+                                        <br>
+                                        <input type="range" id="gainSlider" min="-20" max="20" value="0" step="0.1">
+                                    </div>
+                                    <br><br>
+                                    <div class="slider-container">
+                                        <label>Q: <span id="qValue">1.0</span></label>
+                                        <br>
+                                        <input type="range" id="qSlider" min="0.05" max="10" value="1" step="0.05">
+                                    </div>
+                                </div>
+
+                                <br><br>
+                                <!--Creación y eliminación de filtros-->
+                                <!--<button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>-->
+                                <button class="add_remove-btn" onclick="addFilter()"> Add Filter </button>
+                                <button class="add_remove-btn" onclick="removeFilter()"> Remove Filter </button>
+                            
+                            </div>
+                        </div>
+
+                        <!--Lado derecho del cuadro celeste con la tabla del EQ-->
+                        <div class="lado-derecho">
+                            <div class="parte-superior"></div>
+                            <div class="pare-inferior">
+                                <!-- width="800" height="400"-->
+                                <canvas id="graph" width="800" height="400"></canvas>
+                            </div>
+                        </div>
+                        
+                    </div>
                 </div>
             </div>
-            
-            <button onclick="addFilter()">Add Filter</button>
-            <button onclick="removeFilter()">Remove Filter</button>
-            
-            <canvas id="graph" width="700" height="300"></canvas>
-
-            <script src="eq.js"></script>
+            <script src="eq_channel1.js"></script>
         </body>
         </html>
     `);
+
 
     // Forzar la recarga del archivo de JavaScript en la nueva ventana
     eqWindows[channelKey].onload = function() {
