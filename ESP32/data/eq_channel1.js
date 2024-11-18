@@ -14,8 +14,8 @@
 let printOnMove = false; // Bandera para controlar si se imprimen los valores del filtro mientras se arrastra o después de arrastrar
 
 // Elementos del lienzo en el cuerpo de HTML
-const canvas1 = document.getElementById('graph1'); // Obtener el elemento del lienzo//
-const ctx = canvas1.getContext('2d'); // Obtener el contexto de dibujo (2D) del lienzo
+const canvas = document.getElementById('graph'); // Obtener el elemento del lienzo//
+const ctx = canvas.getContext('2d'); // Obtener el contexto de dibujo (2D) del lienzo
 
 // Número máximo de filtros que se pueden crear
 const MAX_NUM_OF_FILTERS = 5; // Límite para la cantidad de filtros
@@ -24,9 +24,9 @@ const MAX_NUM_OF_FILTERS = 5; // Límite para la cantidad de filtros
 const colors = ['red', 'blue', 'green', 'yellow', 'cyan']; // Colores predefinidos para cada filtro
 
 // Objeto gráfico base que contiene las propiedades para los rangos de frecuencia y ganancia
-const graph1 = {
-    width: canvas1.width,   // Puedes usar canvas1 ya que todos los gráficos usarán el mismo tamaño
-    height: canvas1.height,
+const graph = {
+    width: canvas.width,   // Puedes usar canvas1 ya que todos los gráficos usarán el mismo tamaño
+    height: canvas.height,
     freqMin: 20,
     freqMax: 20000,
     gainMin: -20,
@@ -43,53 +43,53 @@ let isDragging = false;          // Bandera para saber si un filtro está siendo
 
 
 /**
- * Converts an x-coordinate on the canvas1 to a frequency value.
+ * Converts an x-coordinate on the canvas to a frequency value.
  * Función para convertir la coordenada x en el lienzo a un valor de frecuencia
  * 
- * @param {number} x - The x-coordinate on the canvas1.
+ * @param {number} x - The x-coordinate on the canvas.
  * @returns {number} The corresponding frequency value.
  */
 function xToFreq(x) {
-    const logFreqMin = Math.log10(graph1.freqMin); // Convertir la frecuencia mínima a escala logarítmica
-    const logFreqMax = Math.log10(graph1.freqMax); // Convertir la frecuencia máxima a escala logarítmica
-    const logFreq = logFreqMin + (x / graph1.width) * (logFreqMax - logFreqMin); // Mapear x a frecuencia logarítmica
+    const logFreqMin = Math.log10(graph.freqMin); // Convertir la frecuencia mínima a escala logarítmica
+    const logFreqMax = Math.log10(graph.freqMax); // Convertir la frecuencia máxima a escala logarítmica
+    const logFreq = logFreqMin + (x / graph.width) * (logFreqMax - logFreqMin); // Mapear x a frecuencia logarítmica
     return Math.round(Math.pow(10, logFreq)); // Convertir de nuevo a frecuencia lineal, redondeada al entero más cercano
 }
 
 /**
- * Converts a frequency value to an x-coordinate on the canvas1.
+ * Converts a frequency value to an x-coordinate on the canvas.
  * Función para convertir un valor de frecuencia a una coordenada x en el lienzo
  * 
  * @param {number} freq - The frequency value to convert.
- * @returns {number} The corresponding x-coordinate on the canvas1.
+ * @returns {number} The corresponding x-coordinate on the canvas.
  */
 function freqToX(freq) {
-    const logFreqMin = Math.log10(graph1.freqMin); // Conversión a escala logarítmica
-    const logFreqMax = Math.log10(graph1.freqMax);
+    const logFreqMin = Math.log10(graph.freqMin); // Conversión a escala logarítmica
+    const logFreqMax = Math.log10(graph.freqMax);
     const logFreq = Math.log10(freq);
-    return ((logFreq - logFreqMin) / (logFreqMax - logFreqMin)) * graph1.width; // Mapear frecuencia a coordenada x
+    return ((logFreq - logFreqMin) / (logFreqMax - logFreqMin)) * graph.width; // Mapear frecuencia a coordenada x
 }
 
 /**
- * Converts a gain value to a y-coordinate on the canvas1.
+ * Converts a gain value to a y-coordinate on the canvas.
  * Función para convertir un valor de ganancia a una coordenada y en el lienzo
  * 
  * @param {number} gain - The gain value to convert.
- * @returns {number} The corresponding y-coordinate on the canvas1.
+ * @returns {number} The corresponding y-coordinate on the canvas.
  */
 function gainToY(gain) {
-    return (graph1.height / 2) - ((gain / graph1.gainMax) * (graph1.height / 2)); // Mapear ganancia a coordenada y
+    return (graph.height / 2) - ((gain / graph.gainMax) * (graph.height / 2)); // Mapear ganancia a coordenada y
 }
 
 /**
- * Converts a y-coordinate on the canvas1 to a gain value.
+ * Converts a y-coordinate on the canvas to a gain value.
  * Función para convertir una coordenada y en el lienzo a un valor de ganancia
  * 
- * @param {number}  - The y-coordinate on the canvas1.
+ * @param {number}  - The y-coordinate on the canvas.
  * @returns {number} The corresponding gain value.
  */
 function yToGain(y) {
-    return parseFloat((((graph1.height / 2 - y) / (graph1.height / 2)) * graph1.gainMax).toFixed(1)); // Mapear y a ganancia
+    return parseFloat((((graph.height / 2 - y) / (graph.height / 2)) * graph.gainMax).toFixed(1)); // Mapear y a ganancia
 }
 
 /**
@@ -105,7 +105,7 @@ function drawCurve(filter) {
     ctx.beginPath(); // Iniciar una nueva trayectoria para la curva
 
     // Dibujar la curva punto por punto a lo largo del lienzo
-    for (let x = 0; x <= graph1.width; x++) {
+    for (let x = 0; x <= graph.width; x++) {
         const freq = xToFreq(x); // Convertir x a frecuencia
         const distance = Math.log(freq / frequency); // Calcular la distancia logarítmica desde la frecuencia central del filtro
         const gainAdjustment = gain * Math.exp(-Math.pow(distance / q, 2)); // Ajuste gaussiano para la ganancia
@@ -123,7 +123,7 @@ function drawCurve(filter) {
 }
 
 /**
- * Draws the dot representing a filter on the graph1.
+ * Draws the dot representing a filter on the graph.
  * Función para dibujar un punto que representa un filtro en el gráfico
  * 
  * @param {Object} filter - The filter object containing frequency, gain, and color properties.
@@ -141,7 +141,7 @@ function drawDot(filter) {
 
 // Función para borrar el lienzo y redibujar todas las curvas de filtros y la cuadrícula
 function drawAllCurves() {
-    ctx.clearRect(0, 0, graph1.width, graph1.height); // Borrar todo el lienzo
+    ctx.clearRect(0, 0, graph.width, graph.height); // Borrar todo el lienzo
     drawGrid(); // Dibujar la cuadrícula de fondo
 
     // Dibujar la curva de cada filtro
@@ -158,7 +158,7 @@ function drawResultingCurve() {
     ctx.lineWidth = 2;
     ctx.beginPath();
 
-    for (let x = 0; x <= graph1.width; x++) {
+    for (let x = 0; x <= graph.width; x++) {
         const freq = xToFreq(x);
         let totalGain = 0;
 
@@ -183,7 +183,7 @@ function drawResultingCurve() {
 /**
  * Agrega un nuevo filtro al array de filtros y actualiza la interfaz de usuario.
  */
-function addFilter1()
+function addFilter()
 {
     // Verificar si se ha alcanzado el límite máximo de filtros
     if (filters.length >= MAX_NUM_OF_FILTERS)
@@ -204,8 +204,8 @@ function addFilter1()
     };
 
     filters.push(filter);  // Agregar el nuevo filtro al array de filtros
-    addFilter1ToDropdown(filter);  // Agregar la opción del filtro al menú desplegable
-    selectFilter1(filterId);  // Seleccionar el nuevo filtro automáticamente
+    addFilterToDropdown(filter);  // Agregar la opción del filtro al menú desplegable
+    selectFilter(filterId);  // Seleccionar el nuevo filtro automáticamente
     drawAllCurves();  // Redibujar las curvas para reflejar el nuevo filtro
 }
 
@@ -214,44 +214,44 @@ function addFilter1()
  *
  * @param {Object} filter - El objeto de filtro que se agregará al desplegable.
  */
-function addFilter1ToDropdown(filter)
+function addFilterToDropdown(filter)
 {
-    const filterSelect1 = document.getElementById('filterSelect1'); // Obtener el elemento del menú desplegable
+    const filterSelect = document.getElementById('filterSelect'); // Obtener el elemento del menú desplegable
     const option = document.createElement('option'); // Crear un nuevo elemento de opción
     option.value = filter.id;  // Establecer el valor de la opción como el ID del filtro
     option.textContent = `Filtro ${filter.id + 1}`;  // Mostrar "Filtro X" en el desplegable
-    filterSelect1.appendChild(option);  // Agregar la nueva opción al menú
-    filterSelect1.value = filter.id;  // Seleccionar automáticamente el nuevo filtro
+    filterSelect.appendChild(option);  // Agregar la nueva opción al menú
+    filterSelect.value = filter.id;  // Seleccionar automáticamente el nuevo filtro
 }
 
 /**
  * Elimina el filtro actualmente seleccionado del array de filtros y actualiza la interfaz de usuario.
  */
-function removeFilter1()
+function removeFilter()
 {
     if (selectedFilterIndex !== null) {  // Verificar si hay un filtro seleccionado
         // Eliminar el filtro del array de filtros
         filters.splice(selectedFilterIndex, 1);
 
         // Eliminar el filtro del menú desplegable
-        const filterSelect1 = document.getElementById('filterSelect1');
-        filterSelect1.remove(selectedFilterIndex);
+        const filterSelect = document.getElementById('filterSelect');
+        filterSelect.remove(selectedFilterIndex);
 
         // Reasignar IDs y actualizar el menú desplegable después de la eliminación
         filters.forEach((filter, index) => {
             filter.id = index;  // Reasignar el ID del filtro según su nueva posición
             filter.color = colors[index % colors.length];  // Reasignar el color según la nueva posición
-            filterSelect1.options[index].value = index;  // Actualizar el valor del menú desplegable
-            filterSelect1.options[index].text = `Filtro ${index + 1}`;  // Actualizar el texto del menú desplegable
+            filterSelect.options[index].value = index;  // Actualizar el valor del menú desplegable
+            filterSelect.options[index].text = `Filtro ${index + 1}`;  // Actualizar el texto del menú desplegable
         });
 
         // Establecer el índice del filtro seleccionado al último o a null si no hay filtros
         if (filters.length > 0) {
             selectedFilterIndex = filters.length - 1;  // Seleccionar el último filtro
-            filterSelect1.value = selectedFilterIndex;  // Actualizar el valor del menú desplegable
+            filterSelect.value = selectedFilterIndex;  // Actualizar el valor del menú desplegable
         } else {
             selectedFilterIndex = null;  // No hay filtros, establecer el índice seleccionado a null
-            filterSelect1.value = '';  // Limpiar la selección del menú desplegable
+            filterSelect.value = '';  // Limpiar la selección del menú desplegable
         }
 
         updateSliders();  // Actualizar los controles deslizantes de la interfaz
@@ -264,11 +264,11 @@ function removeFilter1()
  *
  * @param {number} id - El ID del filtro que se desea seleccionar.
  */
-function selectFilter1(id)
+function selectFilter(id)
 {
     selectedFilterIndex = id;  // Establece el índice del filtro seleccionado
-    const filterSelect1 = document.getElementById('filterSelect1'); // Obtiene el elemento del menú desplegable
-    filterSelect1.value = id; // Actualiza el menú desplegable para reflejar el filtro seleccionado
+    const filterSelect = document.getElementById('filterSelect'); // Obtiene el elemento del menú desplegable
+    filterSelect.value = id; // Actualiza el menú desplegable para reflejar el filtro seleccionado
     updateSliders();  // Actualiza los controles deslizantes según el filtro seleccionado
     drawAllCurves();  // Redibuja todas las curvas de filtros, incluida la del filtro seleccionado
 }
@@ -276,49 +276,32 @@ function selectFilter1(id)
 /**
  * Maneja los cambios en el menú desplegable de filtros y selecciona el filtro correspondiente.
  */
-function onFilterDropdownChange1()
+function onFilterDropdownChange()
 {
-    const filterSelect1 = document.getElementById('filterSelect1'); // Obtiene el menú desplegable
-    const selectedId = parseInt(filterSelect1.value);  // Convierte el valor seleccionado en un número entero
-    selectFilter1(selectedId);  // Llama a selectFilter1 para aplicar la selección
+    const filterSelect = document.getElementById('filterSelect'); // Obtiene el menú desplegable
+    const selectedId = parseInt(filterSelect.value);  // Convierte el valor seleccionado en un número entero
+    selectFilter(selectedId);  // Llama a selectFilter para aplicar la selección
 }
 
-/*function setupRangeSlider(frequencySlider1Id,
-                          frequencyValue1Id,
-                          gainSlider1Id,
-                          gainValue1Id,
-                          qSlider1Id,
-                          qValue1Id){
-    const frequencySlider1 = document.getElementById(frequencySlider1Id),
-          frequencyValue1 = document.getElementById(frequencyValue1Id),
-          gainSlider1= document.getElementById(gainSlider1Id),
-          gainValue1= document.getElementById(gainValue1Id),
-          qSlider1= document.getElementById(qSlider1Id),
-          qValue1= document.getElementById(qValue1Id);
-}*/
-
-/**
- * Actualiza los valores de los deslizadores según el filtro seleccionado actualmente.
- */
 function updateSliders()
 {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
-        document.getElementById('frequencySlider1').value = filter.frequency;
-        document.getElementById('gainSlider1').value = filter.gain;
-        document.getElementById('qSlider1').value = filter.q;
+        document.getElementById('frequencySlider').value = filter.frequency;
+        document.getElementById('gainSlider').value = filter.gain;
+        document.getElementById('qSlider').value = filter.q;
 
-        document.getElementById('frequencyValue1').textContent = filter.frequency + ' Hz';
-        document.getElementById('gainValue1').textContent = filter.gain + ' dB';
-        document.getElementById('qValue1').textContent = filter.q;
+        document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
+        document.getElementById('gainValue').textContent = filter.gain + ' dB';
+        document.getElementById('qValue').textContent = filter.q;
     } else {
-        document.getElementById('frequencySlider1').value = '';
-        document.getElementById('gainSlider1').value = '';
-        document.getElementById('qSlider1').value = '';
+        document.getElementById('frequencySlider').value = '';
+        document.getElementById('gainSlider').value = '';
+        document.getElementById('qSlider').value = '';
 
-        document.getElementById('frequencyValue1').textContent = '';
-        document.getElementById('gainValue1').textContent = '';
-        document.getElementById('qValue1').textContent = '';
+        document.getElementById('frequencyValue').textContent = '';
+        document.getElementById('gainValue').textContent = '';
+        document.getElementById('qValue').textContent = '';
     }
 }
 
@@ -326,12 +309,12 @@ function updateSliders()
 /**
  * Maneja los cambios de entrada en el deslizante de frecuencia y actualiza el filtro correspondiente.
  */
-document.getElementById('frequencySlider1').oninput = function ()
+document.getElementById('frequencySlider').oninput = function ()
 {
     if (selectedFilterIndex !== null) {  // Verifica que haya un filtro seleccionado
         // Actualiza la frecuencia del filtro seleccionado con el nuevo valor del deslizante
         filters[selectedFilterIndex].frequency = parseInt(this.value);
-        document.getElementById('frequencyValue1').textContent = this.value + ' Hz';  // Muestra la nueva frecuencia en la interfaz
+        document.getElementById('frequencyValue').textContent = this.value + ' Hz';  // Muestra la nueva frecuencia en la interfaz
         drawAllCurves();  // Redibuja todas las curvas de filtros para reflejar el cambio
 
         // Enviar los datos modificados al servidor
@@ -343,10 +326,10 @@ document.getElementById('frequencySlider1').oninput = function ()
 /**
  * Maneja los cambios de entrada en el deslizante de ganancia y actualiza el filtro correspondiente.
  */
-document.getElementById('gainSlider1').oninput = function (){
+document.getElementById('gainSlider').oninput = function (){
     if (selectedFilterIndex !== null) {  // Verifica que haya un filtro seleccionado
         filters[selectedFilterIndex].gain = parseFloat(this.value);  // Actualiza la ganancia del filtro seleccionado
-        document.getElementById('gainValue1').textContent = this.value + ' dB';  // Muestra la ganancia actual en la interfaz
+        document.getElementById('gainValue').textContent = this.value + ' dB';  // Muestra la ganancia actual en la interfaz
         drawAllCurves();  // Redibuja todas las curvas de filtros para reflejar el cambio
 
         // Envía los datos modificados al servidor
@@ -358,10 +341,10 @@ document.getElementById('gainSlider1').oninput = function (){
 /**
  * Maneja los cambios de entrada en el deslizante de Q (factor de calidad) y actualiza el filtro correspondiente.
  */
-document.getElementById('qSlider1').oninput = function (){
+document.getElementById('qSlider').oninput = function (){
     if (selectedFilterIndex !== null) {  // Verifica que haya un filtro seleccionado
         filters[selectedFilterIndex].q = parseFloat(this.value);  // Actualiza el valor de Q del filtro
-        document.getElementById('qValue1').textContent = this.value;  // Muestra el valor de Q en la interfaz
+        document.getElementById('qValue').textContent = this.value;  // Muestra el valor de Q en la interfaz
         drawAllCurves();  // Redibuja todas las curvas de filtros para reflejar el cambio
 
         // Envía los datos modificados al servidor
@@ -371,14 +354,14 @@ document.getElementById('qSlider1').oninput = function (){
 };
 
 /**
- * Maneja los eventos de "mousedown" en el canvas1 para el arrastre de filtros.
+ * Maneja los eventos de "mousedown" en el canvas para el arrastre de filtros.
  *
  * @param {MouseEvent} event - El objeto del evento del ratón.
  */
-canvas1.addEventListener('mousedown', function (e){
-    const rect = canvas1.getBoundingClientRect();  // Obtiene las coordenadas del canvas1
-    const mouseX = e.clientX - rect.left;  // Calcula la posición X del ratón dentro del canvas1
-    const mouseY = e.clientY - rect.top;  // Calcula la posición Y del ratón dentro del canvas1
+canvas.addEventListener('mousedown', function (e){
+    const rect = canvas.getBoundingClientRect();  // Obtiene las coordenadas del canvas
+    const mouseX = e.clientX - rect.left;  // Calcula la posición X del ratón dentro del canvas
+    const mouseY = e.clientY - rect.top;  // Calcula la posición Y del ratón dentro del canvas
 
     // Recorre todos los filtros para verificar si el ratón hizo clic en un punto de filtro
     filters.forEach((filter, index) => {
@@ -389,22 +372,22 @@ canvas1.addEventListener('mousedown', function (e){
         const dist = Math.sqrt(Math.pow(mouseX - dotX, 2) + Math.pow(mouseY - dotY, 2));
         if (dist < 8) {  // Si la distancia es menor que el radio del punto (8px)
             draggingFilterIndex = index;  // Establece el índice del filtro que está siendo arrastrado
-            selectFilter1(index);  // Actualiza el filtro seleccionado cuando se hace clic en él
+            selectFilter(index);  // Actualiza el filtro seleccionado cuando se hace clic en él
             isDragging = true;  // Marca que un filtro está siendo arrastrado
         }
     });
 });
 
 /**
- * Maneja los eventos de "mousemove" en el canvas1 para arrastrar un filtro.
+ * Maneja los eventos de "mousemove" en el canvas para arrastrar un filtro.
  *
  * @param {MouseEvent} event - El objeto del evento del ratón.
  */
-canvas1.addEventListener('mousemove', function (e){
+canvas.addEventListener('mousemove', function (e){
     if (isDragging && draggingFilterIndex !== null) {  // Verifica si se está arrastrando un filtro
-        const rect = canvas1.getBoundingClientRect();  // Obtiene las coordenadas del canvas1
-        const mouseX = e.clientX - rect.left;  // Calcula la posición X del ratón dentro del canvas1
-        const mouseY = e.clientY - rect.top;  // Calcula la posición Y del ratón dentro del canvas1
+        const rect = canvas.getBoundingClientRect();  // Obtiene las coordenadas del canvas
+        const mouseX = e.clientX - rect.left;  // Calcula la posición X del ratón dentro del canvas
+        const mouseY = e.clientY - rect.top;  // Calcula la posición Y del ratón dentro del canvas
 
         const filter = filters[draggingFilterIndex];  // Obtiene el filtro que está siendo arrastrado
         filter.frequency = xToFreq(mouseX);  // Convierte la posición X del ratón a una frecuencia
@@ -422,9 +405,9 @@ canvas1.addEventListener('mousemove', function (e){
 });
 
 /**
- * Maneja los eventos de "mouseup" (botón del ratón liberado) en el canvas1 para detener el arrastre de filtros.
+ * Maneja los eventos de "mouseup" (botón del ratón liberado) en el canvas para detener el arrastre de filtros.
  */
-canvas1.addEventListener('mouseup', function () 
+canvas.addEventListener('mouseup', function () 
 {
     isDragging = false;  // Detiene el arrastre cuando se suelta el botón del ratón
 
@@ -440,11 +423,11 @@ canvas1.addEventListener('mouseup', function ()
 });
 
 /**
- * Maneja los eventos de "mouseleave" (cuando el ratón sale del área del canvas1) para detener el arrastre de filtros.
+ * Maneja los eventos de "mouseleave" (cuando el ratón sale del área del canvas) para detener el arrastre de filtros.
  */
-canvas1.onmouseleave = function () 
+canvas.onmouseleave = function () 
 {
-    isDragging = false;  // Detiene el arrastre cuando el ratón sale del canvas1
+    isDragging = false;  // Detiene el arrastre cuando el ratón sale del canvas
     draggingFilterIndex = null;  // Resetea el índice del filtro arrastrado
 };
 
@@ -520,7 +503,7 @@ function ws_sendFilterData(filterIndex)
 }
 
 /**
- * Dibuja la cuadrícula en el canvas1 para proporcionar una referencia visual.
+ * Dibuja la cuadrícula en el canvas para proporcionar una referencia visual.
  * Se dibujan líneas horizontales (para las ganancias) y líneas verticales (para las frecuencias).
  */
 function drawGrid()
@@ -529,11 +512,11 @@ function drawGrid()
     ctx.lineWidth = 1;  // Establece el grosor de las líneas
 
     // Dibuja líneas horizontales que representan las ganancias
-    for (let gain = graph1.gainMin; gain <= graph1.gainMax; gain += 5) {
+    for (let gain = graph.gainMin; gain <= graph.gainMax; gain += 5) {
         const y = gainToY(gain);  // Convierte la ganancia a la posición Y correspondiente
         ctx.beginPath();
         ctx.moveTo(0, y);  // Comienza la línea en el borde izquierdo
-        ctx.lineTo(graph1.width, y);  // Dibuja la línea hasta el borde derecho
+        ctx.lineTo(graph.width, y);  // Dibuja la línea hasta el borde derecho
         ctx.stroke();  // Traza la línea
 
         ctx.fillStyle = 'white';  // Establece el color del texto
@@ -541,19 +524,19 @@ function drawGrid()
     }
 
     // Dibuja líneas verticales que representan las frecuencias
-    const logFreqMin = Math.log10(graph1.freqMin);  // Convierte la frecuencia mínima a escala logarítmica
-    const logFreqMax = Math.log10(graph1.freqMax);  // Convierte la frecuencia máxima a escala logarítmica
+    const logFreqMin = Math.log10(graph.freqMin);  // Convierte la frecuencia mínima a escala logarítmica
+    const logFreqMax = Math.log10(graph.freqMax);  // Convierte la frecuencia máxima a escala logarítmica
     for (let logFreq = logFreqMin; logFreq <= logFreqMax; logFreq += 0.25) {
         const freq = Math.pow(10, logFreq);  // Convierte la frecuencia de nuevo a su valor real
         const x = freqToX(freq);  // Convierte la frecuencia a la posición X correspondiente
 
         ctx.beginPath();
         ctx.moveTo(x, 0);  // Comienza la línea en el borde superior
-        ctx.lineTo(x, graph1.height);  // Dibuja la línea hasta el borde inferior
+        ctx.lineTo(x, graph.height);  // Dibuja la línea hasta el borde inferior
         ctx.stroke();  // Traza la línea
 
         ctx.fillStyle = 'white';  // Establece el color del texto
-        ctx.fillText(`${Math.round(freq)} Hz`, x + 5, graph1.height - 5);  // Dibuja la etiqueta de frecuencia cerca de la línea
+        ctx.fillText(`${Math.round(freq)} Hz`, x + 5, graph.height - 5);  // Dibuja la etiqueta de frecuencia cerca de la línea
     }
 }
 
@@ -573,6 +556,6 @@ function printFilterValues(filter)
     console.log(JSON.stringify(filterData));  // Imprime los datos del filtro como una cadena JSON
 }
 
-// Inicializa y dibuja la cuadrícula en el canvas1 sin filtros
+// Inicializa y dibuja la cuadrícula en el canvas sin filtros
 drawGrid();
 drawAllCurves();
