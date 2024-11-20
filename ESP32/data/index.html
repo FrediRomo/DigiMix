@@ -17,7 +17,7 @@
 
         <!--Equalizer -->
         <div class="upper-content">
-            <div class="upper-box">
+            <div class="equalizer">
 
                 <!--Lado izquierdo para la modificación de las señales de EQ-->
                 <div class="lado-izquierdo">
@@ -82,145 +82,24 @@
         <!-------------------------Faders------------------------->
         <div class="lower-content">
             <div class="lower-box">
-                <div class="bottom-boxes">
-                    <!-- Canal 1 -->
-                    <div class="bottom-box">
-                        <h3>Ch 1</h3>
-                        <!--On & Off del botón EQ-->
-                        <button class="eq-btn" data-channel="1" onclick="eqFilter(1)" id="eq-button1">EQ</button>
+                <div class="bottom-boxes" id="channels-container">
+                    <!-- Channels will be dynamically added here -->
 
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line1"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb1">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number1">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input1" min="0" max="100" value="50" step="1">
-                        </div>
 
-                        <!--On & Off del botón Mute-->
-                        <!--<button class="mute-btn" onclick="" id="mute-button1">MUTE</button>-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button1">MUTE</button>
+                    <div class="main-channels" id="main-channels-container">
+                        <!-- MAIN L and MAIN R will go here -->
                     </div>
-
-                    <!-- Canal 2 -->
-                    <div class="bottom-box">
-                        <h3>Ch 2</h3>
-                        <!--On & Off del botón EQ-->
-                        <button class="eq-btn" data-channel="2" onclick="eqFilter(2)" id="eq-button2">EQ</button>
-
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line2"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb2">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number2">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input2" min="0" max="100" value="50" step="1">
-                        </div>
-
-                        <!--On & Off del botón Mute-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button2">MUTE</button>
-                    </div>
-
-                    <!-- Canal 3 -->
-                    <div class="bottom-box">
-                        <h3>Ch 3</h3>
-                        <!--On & Off del botón EQ-->
-                        <button class="eq-btn" data-channel="3" onclick="eqFilter(3)" id="eq-button3">EQ</button>
-
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line3"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb3">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number3">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input3" min="0" max="100" value="50" step="1">
-                        </div>
-
-                        <!--On & Off del botón Mute-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button3">MUTE</button>
-                    </div>
-
-                    <!-- Canal 4 -->
-                    <div class="bottom-box">
-                        <h3>Ch 4</h3>
-                        <!--On & Off del botón EQ-->
-                        <button class="eq-btn" data-channel="4" onclick="eqFilter(4)" id="eq-button4">EQ</button>
-
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line4"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb4">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number4">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input4" min="0" max="100" value="50" step="1">
-                        </div>
-
-                        <!--On & Off del botón Mute-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button4">MUTE</button>
-                    </div>
-
-                    <!-- Canal Derecho -->
-                    <div class="bottom-box">
-                        <h3>Right</h3>
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line-right"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb-right">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number-right">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input-right" min="0" max="100" value="50" step="1">
-                        </div>
-
-                        <!--On & Off del botón Mute-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button-right">MUTE</button>
-                    </div>
-
-                    <!-- Canal Izquierdo -->
-                    <div class="bottom-box">
-                        <h3>Left</h3>
-                        <!--Manipulación del slider para la salida de los faders-->
-                        <div class="range__content">
-                            <div class="range__slider">
-                                <div class="range__slider-line" id="range-line-left"></div>
-                            </div>
-                            <div class="range__thumb" id="range-thumb-left">
-                                <div class="range__value">
-                                    <span class="range__value-number" id="range-number-left">50</span>
-                                </div>
-                            </div>
-                            <input type="range" class="range__input" id="range-input-left" min="0" max="100" value="50" step="1">
-                        </div>
-
-                        <!--On & Off del botón Mute-->
-                        <button class="mute-btn" onclick="muteFilter()" id="mute-button-left">MUTE</button>
-                    </div>
-
                 </div>
+
+                
             </div>
         </div>
-    </div>
 
+        <!-- <button onclick="addChannel()">Add Channel</button> -->
+        </div>
+
+
+    
     <script src="faders.js"></script>
     <script src="eq.js"></script>
 
