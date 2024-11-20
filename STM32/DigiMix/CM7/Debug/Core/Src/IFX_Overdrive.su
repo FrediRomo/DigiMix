@@ -1,0 +1,4 @@
+../Core/Src/IFX_Overdrive.c:15:6:IFX_Overdrive_Init	40	static
+../Core/Src/IFX_Overdrive.c:48:6:IFX_Overdrive_SetHPF	16	static
+../Core/Src/IFX_Overdrive.c:52:6:IFX_Overdrive_SetLPF	24	static
+../Core/Src/IFX_Overdrive.c:57:7:IFX_Overdrive_Update	24	static
