@@ -64,7 +64,13 @@ DMA_HandleTypeDef hdma_spi3_tx;
 
 UART_HandleTypeDef huart3;
 
-osThreadId filterTaskHandle;
+/* Definitions for filterTask */
+osThreadId_t filterTaskHandle;
+const osThreadAttr_t filterTask_attributes = {
+  .name = "filterTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 /* USER CODE BEGIN PV */
 
 // CH1 & CH2
@@ -90,7 +96,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_USART3_UART_Init(void);
-void setFilterTask(void const * argument);
+void setFilterTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 void UART_Printf(const char* fmt, ...);
@@ -191,6 +197,9 @@ Error_Handler();
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -208,13 +217,16 @@ Error_Handler();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of filterTask */
-  osThreadDef(filterTask, setFilterTask, osPriorityNormal, 0, 128);
-  filterTaskHandle = osThreadCreate(osThread(filterTask), NULL);
+  /* creation of filterTask */
+  filterTaskHandle = osThreadNew(setFilterTask, NULL, &filterTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
   osKernelStart();
@@ -489,7 +501,7 @@ void processData() {
   * @retval None
   */
 /* USER CODE END Header_setFilterTask */
-void setFilterTask(void const * argument)
+void setFilterTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
