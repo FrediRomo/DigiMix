@@ -1,5 +1,12 @@
+
+                    /*===================================== CHANNEL PARAMETERS ======================================*/
+
 //Number of channels to initialize
-NUM_OF_CHANNELS = 4;
+NUM_OF_CHANNELS = 3;
+
+
+
+                    /*===================================== CHANNEL FUNCTIONS ======================================*/
 
 // Initialize the page with 3 audio channels and 2 main channels
 function initializeChannels() 
@@ -8,13 +15,13 @@ function initializeChannels()
 
     // Add 3 audio channels
     for (let i = 0; i < NUM_OF_CHANNELS; i++) {
-        addChannel(i+1, container);
+        addChannel(i, container);
     }
 
     // Add MAIN L and MAIN R channels to the main container
     const mainContainer = document.getElementById('main-channels-container');
-    addMainChannel("MAIN_L", mainContainer);
-    addMainChannel("MAIN_R", mainContainer);
+    addMainChannel("left", mainContainer);
+    addMainChannel("right", mainContainer);
 }
 
 // Function to create and append a new audio channel
@@ -22,9 +29,9 @@ function addChannel(channelNumber, container = document.getElementById('channels
     const channelDiv = document.createElement('div');
     channelDiv.classList.add('bottom-box');
     channelDiv.innerHTML = `
-        <h3>Ch ${channelNumber}</h3>
+        <h3>Ch ${channelNumber+1}</h3>
 
-        <button class="eq-btn" data-channel="${channelNumber}" onclick="eqFilter(${channelNumber})" id="eq-button${channelNumber}">EQ</button>
+        <button class="eq-btn" data-channel="${channelNumber}" onclick="selectChannel(${channelNumber})" id="eq-button${channelNumber}">EQ</button>
         
         <div class="range_content">
             <div class="range_slider">
@@ -41,6 +48,13 @@ function addChannel(channelNumber, container = document.getElementById('channels
         <button class="mute-btn" onclick="muteFilter(${channelNumber})" id="mute-button${channelNumber}">MUTE</button>
     `;
     container.insertBefore(channelDiv, document.getElementById('main-channels-container'));
+
+    const rangeInput = document.getElementById(`range-input${channelNumber}`);
+    rangeInput.addEventListener('input', () => {
+        console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+    });
+
+
 }
 
 // Function to create and append a new main channel
@@ -64,11 +78,21 @@ function addMainChannel(name, container) {
         <button class="mute-btn" onclick="muteFilter('${name}')" id="mute-button-${name}">MUTE</button>
     `;
     container.appendChild(channelDiv);
+
+
+    const rangeInput = document.getElementById(`range-input-${name}`);
+    rangeInput.addEventListener('input', () => {
+        console.log(`Main Channel ${name} value: ${rangeInput.value}`);
+    });
+
+
 }
 
 // Placeholder functions for EQ and MUTE
-function eqFilter(channel) {
+function eqFilter(channel)
+{
     console.log(`EQ Filter toggled for ${channel}`);
+    alert(`EQ Filter toggled for ${channel}`);
 }
 
 function muteFilter(channel) {
@@ -84,11 +108,8 @@ initializeChannels();
 
 
 
-function setupRangeSlider(rangeThumbId, 
-                          rangeNumberId, 
-                          rangeLineId, 
-                          rangeInputId, 
-                          muteButtonId) {
+function setupRangeSlider(rangeThumbId, rangeNumberId, rangeLineId, rangeInputId, muteButtonId)
+{
     const rangeThumb = document.getElementById(rangeThumbId),
           rangeNumber = document.getElementById(rangeNumberId),
           rangeLine = document.getElementById(rangeLineId),
@@ -137,6 +158,12 @@ function toggleMute(muteButton, rangeInput)
         muteButton.textContent = 'Unmute'; // Cambiar el texto del botón a "Unmute"
     }
 }
+
+
+
+                    /*===================================== INITIALIZE CHANNELS ======================================*/
+
+
 
 // Configura los canales para los faders
 setupRangeSlider('range-thumb1', 'range-number1', 'range-line1', 'range-input1', 'mute-button1');

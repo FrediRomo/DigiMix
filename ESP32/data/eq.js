@@ -10,21 +10,49 @@
  * Integrates WebSocket communication
 */
 
-// Choose whether to print while dragging the filter dot or when dragging ends
-let printOnMove = false;
 
+// WebSocket object for multi-client connection
+const socket = new WebSocket('ws://localhost:8765'); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    /*===================================== FILTERS PARAMETERS ======================================*/
+
+
+const MAX_NUM_OF_FILTERS = 3;                              // Maximum number of filters that can be created
+const colors = ['red', 'blue', 'green', 'yellow', 'cyan']; // Available colors for filters
+const printOnMove = false;                                 // print while dragging the filter dot or when dragging ends
+
+let filters = [];                // Array to store filter objects
+let selectedFilterIndex = null;  // Index of the currently selected filter in the dropdown
+let draggingFilterIndex = null;  // Index of the filter currently being dragged on the canvas
+let isDragging = false;          // Flag to know if a filter is being dragged
+
+                    /*===================================== CHANNEL PARAMETERS ======================================*/
+
+
+// Global structure to store EQs for each channel
+let channelEQs = {}; // E.g., { 1: { filters: [...] }, 2: { filters: [...] }, MAIN: { filters: [...] } }
+let selectedChannel = null; // Currently selected channel ID
+
+
+                    /*===================================== GRPAH PARAMETERS ======================================*/
+
+
+// Base graphic object containing properties for frequency and gain ranges
 // Canvas elements in the HTML body
 const canvas = document.getElementById('graph'); 
 const ctx = canvas.getContext('2d');
-
-
-// Maximum number of filters that can be created
-const MAX_NUM_OF_FILTERS = 3;
-
-// Available colors for filters
-const colors = ['red', 'blue', 'green', 'yellow', 'cyan']; 
-
-// Base graphic object containing properties for frequency and gain ranges
 const graph = {
     width: canvas.width,   
     height: canvas.height,
@@ -34,13 +62,7 @@ const graph = {
     gainMax: 20
 };
 
-// WebSocket object for multi-client connection
-const socket = new WebSocket('ws://localhost:8765'); 
-
-let filters = [];                // Array to store filter objects
-let selectedFilterIndex = null;  // Index of the currently selected filter in the dropdown
-let draggingFilterIndex = null;  // Index of the filter currently being dragged on the canvas
-let isDragging = false;          // Flag to know if a filter is being dragged
+                    /*===================================== GRPAH/GRID FUNCTIONS ======================================*/
 
 
 /**
@@ -138,15 +160,15 @@ function drawDot(filter) {
 
 // Function to clear the canvas and redraw all filter curves and the grid
 function drawAllCurves() {
-    ctx.clearRect(0, 0, graph.width, graph.height); // Clear the entire canvas
-    drawGrid(); // Draw the background grid
+    ctx.clearRect(0, 0, graph.width, graph.height); // Clear the canvas
+    drawGrid(); // Redraw the grid
 
-    // Draw the curve of each filter
+    // Draw the curves for the current channel's filters
     filters.forEach(filter => {
         drawCurve(filter);
     });
 
-    drawResultingCurve(); // Draw the combined frequency response of all filters
+    drawResultingCurve(); // Draw the combined frequency response
 }
 
 // Function to draw the combined frequency response of all filters
@@ -179,31 +201,87 @@ function drawResultingCurve()
 }
 
 /**
+ * Draws the grid on the canvas to provide a visual reference.
+ * Horizontal lines (for gains) and vertical lines (for frequencies) are drawn.
+ */
+function drawGrid() {
+    ctx.strokeStyle = '#555';  // Set the color of the grid lines
+    ctx.lineWidth = 1;         // Set the line thickness
+
+    // Draw horizontal lines representing gains
+    for (let gain = graph.gainMin; gain <= graph.gainMax; gain += 5)
+    {
+        const y = gainToY(gain);     // Convert gain to the corresponding Y position
+        ctx.beginPath();
+        ctx.moveTo(0, y);            // Start line at the left edge
+        ctx.lineTo(graph.width, y);  // Draw line to the right edge
+        ctx.stroke();                // Stroke the line
+
+        ctx.fillStyle = 'white';               // Set text color
+        ctx.fillText(`${gain} dB`, 5, y - 5);  // Draw the gain label near the line
+    }
+
+    // Draw vertical lines representing frequencies
+    const logFreqMin = Math.log10(graph.freqMin);  // Convert minimum frequency to logarithmic scale
+    const logFreqMax = Math.log10(graph.freqMax);  // Convert maximum frequency to logarithmic scale
+    for (let logFreq = logFreqMin; logFreq <= logFreqMax; logFreq += 0.25) {
+        const freq = Math.pow(10, logFreq);  // Convert frequency back to its real value
+        const x = freqToX(freq);             // Convert frequency to the corresponding X position
+
+        ctx.beginPath();
+        ctx.moveTo(x, 0);             // Start line at the top edge
+        ctx.lineTo(x, graph.height);  // Draw line to the bottom edge
+        ctx.stroke();                 // Stroke the line
+
+        ctx.fillStyle = 'white';  // Set text color
+        ctx.fillText(`${Math.round(freq)} Hz`, x + 5, graph.height - 5);  // Draw the frequency label near the line
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    /*===================================== FILTER FUNCTIONS ======================================*/
+
+
+/**
  * Adds a new filter to the array of filters and updates the user interface.
  */
+// Updated function to add a filter (specific to the selected channel)
 function addFilter() {
-    // Check if the maximum number of filters has been reached
     if (filters.length >= MAX_NUM_OF_FILTERS) {
         alert("Maximum number of filters reached");
-        console.error("Maximum number of filters reached, cannot add more");
         return;
     }
 
-    const filterId = filters.length; // The new filter's ID is the current number of filters
-
+    const filterId = filters.length; // Use the current length for new filter ID
     const filter = {
-        id: filterId,            
-        frequency: 1000,                         // Default center frequency 1000 Hz
-        gain: 0,                                 // Default gain 0 dB
-        q: 1,                                    // Default Q factor 1
-        color: colors[filterId % colors.length]  // Assign color based on index
+        id: filterId,
+        frequency: 1000, // Default values
+        gain: 0,
+        q: 1,
+        color: colors[filterId % colors.length]
     };
 
-    filters.push(filter);         // Add the new filter to the array of filters
-    addFilterToDropdown(filter);  // Add the filter option to the dropdown menu
-    selectFilter(filterId);       // Automatically select the new filter
-    drawAllCurves();              // Redraw the curves to reflect the new filter
+    filters.push(filter); // Add to the global filters array
+    addFilterToDropdown(filter); // Add to the dropdown
+    selectFilter(filterId); // Automatically select the new filter
+    drawAllCurves(); // Redraw
+
+    console.log(`Filter added to Channel ${selectedChannel}:`, filter);
 }
+
+
+
 
 /**
  * Adds a filter option to the dropdown menu in the user interface.
@@ -227,40 +305,13 @@ function addFilterToDropdown(filter) {
  * Removes the currently selected filter from the array of filters and updates the user interface.
  */
 function removeFilter() {
+    if (selectedFilterIndex === null) return;
 
-    // Check if there is a selected filter
-    if (selectedFilterIndex !== null)
-    {  
-        
-        // Remove the filter from the array of filters
-        filters.splice(selectedFilterIndex, 1);
+    filters.splice(selectedFilterIndex, 1); // Remove from the global filters array
+    updateFilterDropdown(); // Update the dropdown options
+    drawAllCurves(); // Redraw
 
-        // Remove the filter from the dropdown menu
-        const filterSelect = document.getElementById('filterSelect');
-        filterSelect.remove(selectedFilterIndex);
-
-        // Reassign IDs and update the dropdown menu after removal
-        filters.forEach((filter, index) => {
-            filter.id = index;  // Reassign the filter ID according to its new position
-            filter.color = colors[index % colors.length];  // Reassign color according to the new position
-            filterSelect.options[index].value = index;  // Update dropdown value
-            filterSelect.options[index].text = `Filter ${index + 1}`;  // Update dropdown text
-        });
-
-        // Set the selected filter index to the last or to null if no filters are left
-        if (filters.length > 0) 
-        {
-            selectedFilterIndex = filters.length - 1;  // Select the last filter
-            filterSelect.value = selectedFilterIndex;  // Update dropdown value
-        } else 
-        {
-            selectedFilterIndex = null;  // No filters, set the selected index to null
-            filterSelect.value = '';  // Clear the dropdown selection
-        }
-
-        updateSliders();  // Update interface sliders
-        drawAllCurves();  // Redraw all curves to reflect changes
-    }
+    console.log(`Filter removed from Channel ${selectedChannel}`);
 }
 
 /**
@@ -286,22 +337,18 @@ function onFilterDropdownChange()
     selectFilter(selectedId);                                     // Call selectFilter to apply the selection
 }
 
-function updateSliders() 
-{
-    //Check if there is a Filter to update, if not set everything as empty
+// Update the sliders and save the filter values
+function updateSliders() {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         document.getElementById('frequencySlider').value = filter.frequency;
         document.getElementById('gainSlider').value = filter.gain;
         document.getElementById('qSlider').value = filter.q;
 
-        document.getElementById('frequencyValue').textContent = filter.frequency + ' Hz';
-        document.getElementById('gainValue').textContent = filter.gain + ' dB';
+        document.getElementById('frequencyValue').textContent = `${filter.frequency} Hz`;
+        document.getElementById('gainValue').textContent = `${filter.gain} dB`;
         document.getElementById('qValue').textContent = filter.q;
-    }
-
-    else
-    {
+    } else {
         document.getElementById('frequencySlider').value = '';
         document.getElementById('gainSlider').value = '';
         document.getElementById('qSlider').value = '';
@@ -312,59 +359,42 @@ function updateSliders()
     }
 }
 
-
 /**
  * Handles input changes in the frequency slider and updates the corresponding filter.
  */
-document.getElementById('frequencySlider').oninput = function () 
-{
-    // Check that there is a selected filter
-    if (selectedFilterIndex !== null)
-    {  
-        // Update the frequency of the selected filter with the new slider value
-        filters[selectedFilterIndex].frequency = parseInt(this.value);
-        document.getElementById('frequencyValue').textContent = this.value + ' Hz';  // Display new frequency in the interface
-        drawAllCurves();                                                             // Redraw all filter curves to reflect the change
-
-        // Send the modified data to the server
-        ws_sendFilterData(selectedFilterIndex);           // Function to send filter data to the server
-        printFilterValues(filters[selectedFilterIndex]);  // Print the selected filter's values
+document.getElementById('frequencySlider').oninput = function () {
+    if (selectedFilterIndex !== null) {
+        const filter = filters[selectedFilterIndex];
+        filter.frequency = parseInt(this.value);
+        document.getElementById('frequencyValue').textContent = `${filter.frequency} Hz`;
+        drawAllCurves();
+        ws_sendFilterData(selectedFilterIndex);
     }
 };
 
 /**
  * Handles input changes in the gain slider and updates the corresponding filter.
  */
-document.getElementById('gainSlider').oninput = function ()
-{
-    // Check that there is a selected filter
-    if (selectedFilterIndex !== null)
-    {  
-        filters[selectedFilterIndex].gain = parseFloat(this.value);             // Update gain of the selected filter
-        document.getElementById('gainValue').textContent = this.value + ' dB';  // Display current gain in the interface
-        drawAllCurves();                                                        // Redraw all filter curves to reflect the change
-
-        // Send the modified data to the server
-        ws_sendFilterData(selectedFilterIndex);  // Send data to the server for synchronization
-        printFilterValues(filters[selectedFilterIndex]);  // Print the selected filter's values
+document.getElementById('gainSlider').oninput = function () {
+    if (selectedFilterIndex !== null) {
+        const filter = filters[selectedFilterIndex];
+        filter.gain = parseFloat(this.value);
+        document.getElementById('gainValue').textContent = `${filter.gain} dB`;
+        drawAllCurves();
+        ws_sendFilterData(selectedFilterIndex);
     }
 };
 
 /**
  * Handles input changes in the Q (quality factor) slider and updates the corresponding filter.
  */
-document.getElementById('qSlider').oninput = function () 
-{
-    // Check that there is a selected filter
-    if (selectedFilterIndex !== null) 
-    {  
-        filters[selectedFilterIndex].q = parseFloat(this.value);     // Update Q value of the filter
-        document.getElementById('qValue').textContent = this.value;  // Display Q value in the interface
-        drawAllCurves();                                             // Redraw all filter curves to reflect the change
-
-        // Send the modified data to the server
-        ws_sendFilterData(selectedFilterIndex);           // Send filter data to the server
-        printFilterValues(filters[selectedFilterIndex]);  // Print the selected filter's values
+document.getElementById('qSlider').oninput = function () {
+    if (selectedFilterIndex !== null) {
+        const filter = filters[selectedFilterIndex];
+        filter.q = parseFloat(this.value);
+        document.getElementById('qValue').textContent = filter.q;
+        drawAllCurves();
+        ws_sendFilterData(selectedFilterIndex);
     }
 };
 
@@ -453,6 +483,86 @@ canvas.onmouseleave = function () {
     draggingFilterIndex = null;  // Reset the dragged filter index
 };
 
+
+/**
+ * Prints the current values of a filter to the console.
+ *
+ * @param {Object} filter - The filter whose values will be printed.
+ */
+function printFilterValues(filter)
+{
+    const filterData = {
+        id: filter.id,  // Filter ID
+        frequency: filter.frequency,  // Filter frequency
+        gain: parseFloat(filter.gain),  // Filter gain (converted to a float)
+        q: filter.q  // Filter Q value
+    };
+    console.log(JSON.stringify(filterData));  // Print the filter data as a JSON string
+}
+
+
+// Function to update the filter dropdown to reflect the selected channel
+function updateFilterDropdown() {
+    const filterSelect = document.getElementById('filterSelect');
+    filterSelect.innerHTML = ''; // Clear existing options
+
+    filters.forEach((filter) => {
+        const option = document.createElement('option');
+        option.value = filter.id;
+        option.textContent = `Filter ${filter.id + 1}`;
+        filterSelect.appendChild(option);
+    });
+
+    if (filters.length > 0) {
+        filterSelect.value = filters[0].id; // Default to the first filter
+        selectFilter(filters[0].id); // Select the first filter
+    } else {
+        selectedFilterIndex = null; // No filters available
+    }
+}
+
+
+
+
+
+                    /*===================================== CHANNEL FUNCTIONS ======================================*/
+
+// Function to select a channel and load its EQ
+function selectChannel(channelNumber) {
+    // Save the current channel's filters
+    if (selectedChannel !== null && channelEQs[selectedChannel]) {
+        channelEQs[selectedChannel].filters = [...filters]; // Save global filters into the current channel's EQ
+    }
+
+    // Set the new selected channel
+    selectedChannel = channelNumber;
+
+    // Load the selected channel's filters
+    if (!channelEQs[selectedChannel]) {
+        channelEQs[selectedChannel] = { filters: [] }; // Initialize channel if not present
+    }
+    filters = [...channelEQs[selectedChannel].filters]; // Load filters into the global array
+
+    // Update the UI
+    updateFilterDropdown(); // Update dropdown to show filters for the selected channel
+    updateSliders(); // Sync the sliders with the new channel's filters
+    drawAllCurves(); // Redraw the EQ graph for the new channel
+
+    document.getElementById("eq_channel_num").innerHTML = `Channel ${channelNumber+1}`
+
+    console.log(`Channel ${channelNumber} selected`);
+}
+
+
+
+
+
+
+
+
+                    /*===================================== WEBSOCKETS FUNCTIONS ======================================*/
+
+
 /**
  * Listens for the WebSocket connection open event.
  */
@@ -494,92 +604,43 @@ socket.onclose = () => {
  *
  * @param {number} filterIndex - The index of the filter to be sent.
  */
-function ws_sendFilterData(filterIndex)
-{
-    // Check that the filter index is valid
-    if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length)
-    {
-        const filter = filters[filterIndex];  // Get the corresponding filter
+
+
+// Updated WebSocket function to include channel information
+function ws_sendFilterData(filterIndex) {
+    if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length) {
+        const filter = filters[filterIndex];
         const data = {
+            channel: selectedChannel, // Include channel in the data
             id: filter.id,
             frequency: filter.frequency,
             gain: filter.gain,
             q: filter.q
         };
-        
-        // Check if the WebSocket connection is ready to send data
+
         if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(data));  // Send the data as a JSON message to the server
-            console.log("Data sent:", data);  // Print the data sent
-        } 
-        else {
-            console.error("WebSocket is not open.");  // If connection is not open, print an error
+            socket.send(JSON.stringify(data)); // Send the data to the server
+            console.log(`Data sent for Channel ${selectedChannel}:`, data);
+        } else {
+            console.error("WebSocket is not open.");
         }
-    } 
-    else
-    {
-        console.error("Invalid filter index.");  // If filter index is invalid, print an error
     }
 }
 
-/**
- * Draws the grid on the canvas to provide a visual reference.
- * Horizontal lines (for gains) and vertical lines (for frequencies) are drawn.
- */
-function drawGrid() {
-    ctx.strokeStyle = '#555';  // Set the color of the grid lines
-    ctx.lineWidth = 1;         // Set the line thickness
-
-    // Draw horizontal lines representing gains
-    for (let gain = graph.gainMin; gain <= graph.gainMax; gain += 5)
-    {
-        const y = gainToY(gain);     // Convert gain to the corresponding Y position
-        ctx.beginPath();
-        ctx.moveTo(0, y);            // Start line at the left edge
-        ctx.lineTo(graph.width, y);  // Draw line to the right edge
-        ctx.stroke();                // Stroke the line
-
-        ctx.fillStyle = 'white';               // Set text color
-        ctx.fillText(`${gain} dB`, 5, y - 5);  // Draw the gain label near the line
-    }
-
-    // Draw vertical lines representing frequencies
-    const logFreqMin = Math.log10(graph.freqMin);  // Convert minimum frequency to logarithmic scale
-    const logFreqMax = Math.log10(graph.freqMax);  // Convert maximum frequency to logarithmic scale
-    for (let logFreq = logFreqMin; logFreq <= logFreqMax; logFreq += 0.25) {
-        const freq = Math.pow(10, logFreq);  // Convert frequency back to its real value
-        const x = freqToX(freq);             // Convert frequency to the corresponding X position
-
-        ctx.beginPath();
-        ctx.moveTo(x, 0);             // Start line at the top edge
-        ctx.lineTo(x, graph.height);  // Draw line to the bottom edge
-        ctx.stroke();                 // Stroke the line
-
-        ctx.fillStyle = 'white';  // Set text color
-        ctx.fillText(`${Math.round(freq)} Hz`, x + 5, graph.height - 5);  // Draw the frequency label near the line
-    }
-}
-
-/**
- * Prints the current values of a filter to the console.
- *
- * @param {Object} filter - The filter whose values will be printed.
- */
-function printFilterValues(filter)
-{
-    const filterData = {
-        id: filter.id,  // Filter ID
-        frequency: filter.frequency,  // Filter frequency
-        gain: parseFloat(filter.gain),  // Filter gain (converted to a float)
-        q: filter.q  // Filter Q value
-    };
-    console.log(JSON.stringify(filterData));  // Print the filter data as a JSON string
-}
 
 
 
+
+
+
+
+
+
+                    /*===================================== FUNCTIONS WHEN PAGE LOADS ======================================*/
 
 
 // Initialize and draw the grid on the canvas without filters
+selectChannel(0);
 drawGrid();
 drawAllCurves();
+
