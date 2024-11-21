@@ -142,12 +142,17 @@ body {
     width: 65px;
     height: 30px;
     border-radius:50%;
-    background-color: #252525; /* Color de fondo del botón EQ */
-    border: 2px solid rgb(208, 208, 208); /* Sin borde alrededor del botón */
+    background-color: #256b74; /* Color de fondo del botón EQ */
+    /*border: 1px solid rgb(208, 208, 208);*/ /* Sin borde alrededor del botón */
     padding: 5px 10px; /* Espaciado interno del botón */
     color: rgb(208, 208, 208); /* Color del texto del botón */
     padding: 5px 8px; /* Espaciado interno del botón */
     margin-top: 10px; /* Espaciado superior del botón */
+}
+
+.eq-btn:hover
+{
+    background-color: rgba(90, 208, 224, 0.329);
 }
 
 .mute-btn {
