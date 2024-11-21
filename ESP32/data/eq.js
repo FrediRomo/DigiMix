@@ -1,3 +1,13 @@
+/**
+ * TODO:
+ * - Implement deletion of filters (channelEQs obj is not deleting its filters)
+ * - Some sliders are updating their val but the square is not moving
+ */
+
+
+
+
+
 /*
  * FILE: eq.js
  * 
@@ -11,18 +21,10 @@
 */
 
 
+let isDebugMode = true;
+
 // WebSocket object for multi-client connection
 const socket = new WebSocket('ws://localhost:8765'); 
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -338,7 +340,8 @@ function onFilterDropdownChange()
 }
 
 // Update the sliders and save the filter values
-function updateSliders() {
+function updateSliders()
+{
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         document.getElementById('frequencySlider').value = filter.frequency;
@@ -363,11 +366,13 @@ function updateSliders() {
  * Handles input changes in the frequency slider and updates the corresponding filter.
  */
 document.getElementById('frequencySlider').oninput = function () {
-    if (selectedFilterIndex !== null) {
+    if (selectedFilterIndex !== null)
+    {
         const filter = filters[selectedFilterIndex];
         filter.frequency = parseInt(this.value);
         document.getElementById('frequencyValue').textContent = `${filter.frequency} Hz`;
         drawAllCurves();
+        saveChannelFilters(selectChannel);
         ws_sendFilterData(selectedFilterIndex);
     }
 };
@@ -381,6 +386,7 @@ document.getElementById('gainSlider').oninput = function () {
         filter.gain = parseFloat(this.value);
         document.getElementById('gainValue').textContent = `${filter.gain} dB`;
         drawAllCurves();
+        saveChannelFilters(selectChannel);
         ws_sendFilterData(selectedFilterIndex);
     }
 };
@@ -394,6 +400,7 @@ document.getElementById('qSlider').oninput = function () {
         filter.q = parseFloat(this.value);
         document.getElementById('qValue').textContent = filter.q;
         drawAllCurves();
+        saveChannelFilters(selectChannel);
         ws_sendFilterData(selectedFilterIndex);
     }
 };
@@ -467,6 +474,7 @@ canvas.addEventListener('mouseup', function () {
     {
         
         printFilterValues(filters[draggingFilterIndex]);  // Print the filter's values after releasing the mouse
+        saveChannelFilters(selectChannel);
 
         // Send the filter data to the server
         ws_sendFilterData(selectedFilterIndex);
@@ -528,11 +536,10 @@ function updateFilterDropdown() {
                     /*===================================== CHANNEL FUNCTIONS ======================================*/
 
 // Function to select a channel and load its EQ
-function selectChannel(channelNumber) {
+function selectChannel(channelNumber)
+{
     // Save the current channel's filters
-    if (selectedChannel !== null && channelEQs[selectedChannel]) {
-        channelEQs[selectedChannel].filters = [...filters]; // Save global filters into the current channel's EQ
-    }
+    saveChannelFilters(channelEQs);
 
     // Set the new selected channel
     selectedChannel = channelNumber;
@@ -551,6 +558,16 @@ function selectChannel(channelNumber) {
     document.getElementById("eq_channel_num").innerHTML = `Channel ${channelNumber+1}`
 
     console.log(`Channel ${channelNumber} selected`);
+}
+
+
+function saveChannelFilters(channelNumber)
+{
+    // Save the current channel's filters on the channelEQs object
+    if (selectedChannel !== null && channelEQs[selectedChannel])
+    {
+        channelEQs[selectedChannel].filters = [...filters]; // Save global filters into the current channel's EQ
+    }
 }
 
 
