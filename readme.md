@@ -17,5 +17,5 @@ IoT to remotely connect and modify our filters, etc. to get the desired audio ou
 - Christian Payan
 - David Gomez
 - Pablo Vargas
-- Yaina
+- Paola Ramos
 
