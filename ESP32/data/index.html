@@ -6,8 +6,6 @@
     <title>DigiMix</title>
 <link rel="stylesheet" href="styles.css">
 
-
-
 </head>
 <body>
     <div class="container">
@@ -70,38 +68,30 @@
                     <div class="parte-superior"></div>
                     <div class="pare-inferior">
                         <!-- width="1200" height="420"-->
-                        <canvas id="graph" width="1200" height="420"></canvas>
+                        <canvas id="graph" width="1000" height="420"></canvas>
                     </div>
                 </div>
                 
             </div>
         </div>
-        
-        
         
         <!-------------------------Faders------------------------->
         <div class="lower-content">
             <div class="lower-box">
                 <div class="bottom-boxes" id="channels-container">
                     <!-- Channels will be dynamically added here -->
-
-
-                    <div class="main-channels" id="main-channels-container">
-                        <!-- MAIN L and MAIN R will go here -->
+                    <div id="main-channels-container" style="display: flex; gap: 100px;">
                     </div>
                 </div>
-
-                
             </div>
         </div>
 
         <!-- <button onclick="addChannel()">Add Channel</button> -->
         </div>
-
-
     
     <script src="faders.js"></script>
     <script src="eq.js"></script>
 
 </body>
 </html>
+
