@@ -13,7 +13,7 @@
 
 // WebSocket object for multi-client connection
 
-const DEBUG = true;
+const DEBUG = false;
 const socket = (DEBUG) ? new WebSocket('ws://localhost:8765') : new WebSocket('ws://192.168.4.1/ws'); 
  
 
