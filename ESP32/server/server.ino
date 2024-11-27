@@ -65,7 +65,6 @@ void broadcastToOthers(const String &message, uint32_t excludeClientId)
 
 
 
-#include <Arduino_JSON.h>  // Include Arduino_JSON library
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client)
 {
