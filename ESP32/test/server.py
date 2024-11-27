@@ -42,7 +42,7 @@ async def broadcast_to_others(message, sender_socket):
 async def main():
     # Start server on localhost and port 8765
     async with websockets.serve(handle_connection, "localhost", 8765):
-        print("WebSocket server is running on ws://localhost:8765")
+        print("Test server is running on ws://localhost:8765")
         await asyncio.Future()  # Run the server forever
 
 if __name__ == "__main__":
