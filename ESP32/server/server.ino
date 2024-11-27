@@ -63,16 +63,18 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
   {
-    //data[len] = 0;
-    //String message = (char*)data;
-    // Check if the message is "getReadings"
-    //if (strcmp((char*)data, "getReadings") == 0) {
-      //if it is, send current sensor readings
-      Serial.print("HandleWSMessge");
-      notifyClients("Hola a todos");
-    //}
+    // Convert the received data to a string
+    String message = String((char*)data, len);
+    
+    // Print the received message
+    Serial.print("Received WebSocket message: ");
+    Serial.println(message);
+    
+    // Optionally, send a response (you can modify this as needed)
+    notifyClients("Hola a todos");
   }
 }
+
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
 {
@@ -118,6 +120,7 @@ void setup()
     // Web Server Root URL
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(LittleFS, "/index.html", "text/html");
+    Serial.println("/ Requested");
   });
 
   server.serveStatic("/", LittleFS, "/");
