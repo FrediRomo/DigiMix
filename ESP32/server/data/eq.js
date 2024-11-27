@@ -12,9 +12,10 @@
 
 
 // WebSocket object for multi-client connection
-let socket = new WebSocket('ws://localhost:80'); 
 
-
+const DEBUG = true;
+const socket = (DEBUG) ? new WebSocket('ws://localhost:8765') : new WebSocket('ws://192.168.4.1/ws'); 
+ 
 
 
 
@@ -605,14 +606,12 @@ socket.onclose = () => {
  * @param {number} filterIndex - The index of the filter to be sent.
  */
 
-
-// Updated WebSocket function to include channel information
 function ws_sendFilterData(filterIndex) {
     if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length) {
         const filter = filters[filterIndex];
         const data = {
             channel: selectedChannel, // Include channel in the data
-            id: filter.id,
+            filter_id: filter.id,
             frequency: filter.frequency,
             gain: filter.gain,
             q: filter.q
@@ -626,6 +625,27 @@ function ws_sendFilterData(filterIndex) {
         }
     }
 }
+
+
+
+function ws_sendChannelVolume(channelID, value)
+{
+    const data = {
+        channel: channelID, // Include channel in the data
+        value: value
+    }
+
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify(data)); // Send the data to the server
+        console.log(`Volume sent for Channel ${selectedChannel}:`, data);
+    } 
+    else
+    {
+        console.error("WebSocket is not open.");
+    }
+}
+
+
 
 
 

@@ -49,7 +49,8 @@ function addChannel(channelNumber, container = document.getElementById('channels
 
     const rangeInput = document.getElementById(`range-input${channelNumber}`);
     rangeInput.addEventListener('input', () => {
-        console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+        ws_sendChannelVolume(channelNumber, rangeInput.value);
+        //console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
     });
 }
 
@@ -77,7 +78,8 @@ function addMainChannel(name, container) {
 
     const rangeInput = document.getElementById(`range-input-${name}`);
     rangeInput.addEventListener('input', () => {
-        console.log(`Main Channel ${name} value: ${rangeInput.value}`);
+        ws_sendChannelVolume(name, rangeInput.value);
+        //console.log(`Main Channel ${name} value: ${rangeInput.value}`);
     });
 
 }
