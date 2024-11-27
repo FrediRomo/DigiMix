@@ -12,7 +12,7 @@
 
 
 // WebSocket object for multi-client connection
-const socket = new WebSocket('ws://localhost:80'); 
+let socket = new WebSocket('ws://localhost:80'); 
 
 
 
