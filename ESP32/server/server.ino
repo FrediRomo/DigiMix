@@ -9,7 +9,7 @@
 const char* ssid = "DIGIMIX";
 const char* password = "DIGIMIX";
 
-// Create server object on port 80
+// Create server object on port 8765
 AsyncWebServer server(80);
 
 // Create websocket object
