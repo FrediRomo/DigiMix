@@ -52,13 +52,22 @@ void initWiFi()
 
 
 
-
-void notifyClients(String message)
+void broadcastToOthers(const String &message, uint32_t excludeClientId)
 {
-  ws.textAll(message);
+  // Iterate through all connected clients
+  for (AsyncWebSocketClient *c : ws.getClients()) {
+    if (c->id() != excludeClientId) {  // Skip the sender
+      c->text(message);
+    }
+  }
 }
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
+
+
+
+#include <Arduino_JSON.h>  // Include Arduino_JSON library
+
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client)
 {
   AwsFrameInfo *info = (AwsFrameInfo*)arg;
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
@@ -69,11 +78,30 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
     // Print the received message
     Serial.print("Received WebSocket message: ");
     Serial.println(message);
-    
-    // Optionally, send a response (you can modify this as needed)
-    notifyClients("Hola a todos");
+
+    // Parse the JSON message using Arduino_JSON
+    JSONVar jsonObj = JSON.parse(message);
+
+    // Check if parsing succeeded
+    if (JSON.typeof(jsonObj) == "undefined") {
+      Serial.println("JSON parsing failed!");
+      return;
+    }
+
+    // Extract specific values from the JSON object
+    int channel = int(jsonObj["channel"]);  // Convert to integer
+    String value = (const char*) jsonObj["value"]; // Extract "value" as a String
+
+    // Print extracted values
+    Serial.print("Channel: ");
+    Serial.println(channel);
+    Serial.print("Value: ");
+    Serial.println(value);
+
+    broadcastToOthers(message, client->id());
   }
 }
+
 
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
@@ -87,7 +115,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
       Serial.printf("WebSocket client #%u disconnected\n", client->id());
       break;
     case WS_EVT_DATA:
-      handleWebSocketMessage(arg, data, len);
+      handleWebSocketMessage(arg, data, len, client);
       break;
     case WS_EVT_PONG:
     case WS_EVT_ERROR:
@@ -130,8 +158,12 @@ void setup()
 
 }
 
+
+
+
 void loop()
 {
   // Do nothing for now, all is handled on server begin
+  ws.cleanupClients();
 
 }
