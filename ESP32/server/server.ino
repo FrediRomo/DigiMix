@@ -103,7 +103,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocket
       if (!jsonObj.hasOwnProperty("channel") || !jsonObj.hasOwnProperty("value"))
       {
         Serial.println("Missing 'channel' or 'value' keys!");
-        return;
+        return; 
       }
 
       int channel = (int)jsonObj["channel"];  // Convert to integer
@@ -147,7 +147,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocket
   Serial.print(",Q:");
   Serial.println(q, 1);
 
-  // Add your filter handling logic here (e.g., applying settings to hardware)
+
   } 
   else {
     Serial.println("Unknown control character!");
