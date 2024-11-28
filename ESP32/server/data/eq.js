@@ -576,14 +576,35 @@ socket.onopen = () => {
  */
 socket.onmessage = (event) => {
     console.log('Message from server:', event.data);  // Print the message received from the server
+    const receivedMessage = JSON.parse(event.data);
 
-    // Process the filter data received in the message
-    let filter = event.data;
-    filters[filter.id] = filter;  // Update the corresponding filter in the filter array
+    const ctrlChar = receivedMessage.ctrl;
+    console.log(`Control Character: ${ctrlChar}, Channel: ${receivedMessage.channel}, Value: ${receivedMessage.value}`);
 
-    // Update the user interface and redraw the curves with the new filter data
-    updateSliders();
-    drawAllCurves();
+    if (ctrlChar === "v") {
+        // Log to check if the element is found
+        const rangeNumberElement = document.getElementById(`range-number-${receivedMessage.channel}`);
+        console.log(`Range Number Element:`, rangeNumberElement);
+
+        if (rangeNumberElement) {
+            rangeNumberElement.textContent = receivedMessage.value;
+        } else {
+            console.warn(`Element range-number-${receivedMessage.channel} not found`);
+        }
+
+        const rangeInputElement = document.getElementById(`range-input-${receivedMessage.channel}`);
+        console.log(`Range Input Element:`, rangeInputElement);
+
+        if (rangeInputElement) {
+            rangeInputElement.value = receivedMessage.value;
+        } else {
+            console.warn(`Element range-input-${receivedMessage.channel} not found`);
+        }
+    } else if (ctrlChar === "f") {
+        console.log("Filter value received");
+    } else {
+        console.error("Invalid control character received");
+    }
 };
 
 /**
