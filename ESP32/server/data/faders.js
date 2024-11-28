@@ -1,6 +1,6 @@
 /*===================================== CHANNEL PARAMETERS ======================================*/
 //Number of channels to initialize
-NUM_OF_CHANNELS = 3;
+const NUM_OF_CHANNELS = 3;
 
 /*===================================== CHANNEL FUNCTIONS ======================================*/
 // Initialize the page with 3 audio channels and 2 main channels
