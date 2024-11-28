@@ -610,6 +610,7 @@ function ws_sendFilterData(filterIndex) {
     if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length) {
         const filter = filters[filterIndex];
         const data = {
+            ctrl: "f",                // f to tell server we're only sending filter info 
             channel: selectedChannel, // Include channel in the data
             filter_id: filter.id,
             frequency: filter.frequency,
@@ -631,6 +632,7 @@ function ws_sendFilterData(filterIndex) {
 function ws_sendChannelVolume(channelID, value)
 {
     const data = {
+        ctrl: "v",          // V to tell the server we're sending channel volume only
         channel: channelID, // Include channel in the data
         value: value
     }
