@@ -634,7 +634,7 @@ function ws_sendChannelVolume(channelID, value)
     const data = {
         ctrl: "v",          // V to tell the server we're sending channel volume only
         channel: channelID, // Include channel in the data
-        value: value
+        value: Number(value) 
     }
 
     if (socket && socket.readyState === WebSocket.OPEN) {
