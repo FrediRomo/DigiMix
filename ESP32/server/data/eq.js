@@ -588,23 +588,21 @@ socket.onmessage = (event) => {
     //check if ctrl char is v for volume control 
     if (ctrlChar === "v")
     {
-        // Log to check if the element is found
         const rangeNumberElement = document.getElementById(`range-number${receivedMessage.channel}`);
-        console.log(`Range Number Element:`, rangeNumberElement);
-
-        if (rangeNumberElement) {
-            rangeNumberElement.textContent = receivedMessage.value;
-        } else {
-            console.warn(`Element range-number${receivedMessage.channel} not found`);
-        }
-
         const rangeInputElement = document.getElementById(`range-input${receivedMessage.channel}`);
-        console.log(`Range Input Element:`, rangeInputElement);
+        const rangeThumbElement = document.getElementById(`range-thumb${receivedMessage.channel}`);
 
-        if (rangeInputElement) {
+        if (rangeNumberElement && rangeInputElement && rangeThumbElement) {
+            // Update the displayed value
+            rangeNumberElement.textContent = receivedMessage.value;
+            
+            // Update the input value
             rangeInputElement.value = receivedMessage.value;
-        } else {
-            console.warn(`Element range-input${receivedMessage.channel} not found`);
+            
+            // Calculate and update the thumb position
+            const thumbPosition = 1 - (rangeInputElement.value / rangeInputElement.max);
+            const space = rangeInputElement.offsetWidth - rangeThumbElement.offsetWidth;
+            rangeThumbElement.style.top = (thumbPosition * space) + 'px';
         }
     } else if (ctrlChar === "f") {
         console.log("Filter value received");
