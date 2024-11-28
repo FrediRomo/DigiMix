@@ -14,7 +14,11 @@
 // WebSocket object for multi-client connection
 
 const DEBUG = false;
+
+
+
 const socket = (DEBUG) ? new WebSocket('ws://localhost:8765') : new WebSocket('ws://192.168.4.1/ws'); 
+
  
 
 
@@ -581,24 +585,26 @@ socket.onmessage = (event) => {
     const ctrlChar = receivedMessage.ctrl;
     console.log(`Control Character: ${ctrlChar}, Channel: ${receivedMessage.channel}, Value: ${receivedMessage.value}`);
 
-    if (ctrlChar === "v") {
+    //check if ctrl char is v for volume control 
+    if (ctrlChar === "v")
+    {
         // Log to check if the element is found
-        const rangeNumberElement = document.getElementById(`range-number-${receivedMessage.channel}`);
+        const rangeNumberElement = document.getElementById(`range-number${receivedMessage.channel}`);
         console.log(`Range Number Element:`, rangeNumberElement);
 
         if (rangeNumberElement) {
             rangeNumberElement.textContent = receivedMessage.value;
         } else {
-            console.warn(`Element range-number-${receivedMessage.channel} not found`);
+            console.warn(`Element range-number${receivedMessage.channel} not found`);
         }
 
-        const rangeInputElement = document.getElementById(`range-input-${receivedMessage.channel}`);
+        const rangeInputElement = document.getElementById(`range-input${receivedMessage.channel}`);
         console.log(`Range Input Element:`, rangeInputElement);
 
         if (rangeInputElement) {
             rangeInputElement.value = receivedMessage.value;
         } else {
-            console.warn(`Element range-input-${receivedMessage.channel} not found`);
+            console.warn(`Element range-input${receivedMessage.channel} not found`);
         }
     } else if (ctrlChar === "f") {
         console.log("Filter value received");
@@ -627,7 +633,8 @@ socket.onclose = () => {
  * @param {number} filterIndex - The index of the filter to be sent.
  */
 
-function ws_sendFilterData(filterIndex) {
+function ws_sendFilterData(filterIndex)
+{
     if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length) {
         const filter = filters[filterIndex];
         const data = {
@@ -668,17 +675,6 @@ function ws_sendChannelVolume(channelID, value)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
                     /*===================================== FUNCTIONS WHEN PAGE LOADS ======================================*/
 
 
@@ -686,4 +682,3 @@ function ws_sendChannelVolume(channelID, value)
 selectChannel(0);
 drawGrid();
 drawAllCurves();
-

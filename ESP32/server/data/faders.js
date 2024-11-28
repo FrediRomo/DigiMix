@@ -113,10 +113,7 @@ function setupRangeSlider(rangeThumbId, rangeNumberId, rangeLineId, rangeInputId
         const space = rangeInput.offsetWidth - rangeThumb.offsetWidth;
 
         rangeThumb.style.top = (thumbPosition * space) + 'px';
-        
-        /* Invertimos la altura de la línea de color
-        const invertedHeight = 100 - rangeInput.value;
-        rangeLine.style.height = invertedHeight + '%';*/
+
     };
     
     rangeInput.addEventListener('input', rangeInputSlider);
