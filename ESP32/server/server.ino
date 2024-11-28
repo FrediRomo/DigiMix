@@ -149,16 +149,14 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocket
 
 
   } 
-  else {
+  else
+  {
     Serial.println("Unknown control character!");
   }
 
   // Broadcast message to other clients after successful processing
   broadcastToOthers(message, client->id());
-
-
-    // Broadcast message to other clients
-    broadcastToOthers(message, client->id());
+  
   }
 }
 
