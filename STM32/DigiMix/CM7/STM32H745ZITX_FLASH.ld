@@ -61,12 +61,30 @@ SECTIONS
 
     . = ALIGN(32);
     
+    /* CH1 & CH2 */
     . = ABSOLUTE (0x30010000);
-    *(.rxBuffer)
+    *(.rxBuffer1)
 
 
     . = ABSOLUTE (0x30012000);
-    *(.txBuffer)
+    *(.txBuffer1)
+    
+    /* CH3 & CH4 */
+    . = ABSOLUTE (0x30014000);
+    *(.rxBuffer2)
+
+
+    . = ABSOLUTE (0x30016000);
+    *(.txBuffer2)
+    
+    . = ABSOLUTE (0x30018000);
+    *(.rxUARTBuffer)
+    
+    . = ABSOLUTE (0x3001A000);
+    *(.txUARTBuffer1)
+    
+    . = ABSOLUTE (0x3001C000);
+    *(.txUARTBuffer2)
  
   } >RAM_D2
   /* The startup code into "FLASH" Rom type memory */
