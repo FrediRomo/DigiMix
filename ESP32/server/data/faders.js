@@ -1,6 +1,6 @@
 /*===================================== CHANNEL PARAMETERS ======================================*/
 //Number of channels to initialize
-NUM_OF_CHANNELS = 3;
+const NUM_OF_CHANNELS = 3;
 
 /*===================================== CHANNEL FUNCTIONS ======================================*/
 // Initialize the page with 3 audio channels and 2 main channels
@@ -18,7 +18,7 @@ function initializeChannels()
     mainContainer.style.display = 'flex';  // Asegurar que el contenedor principal sea flexbox
     mainContainer.style.flexDirection = 'row';  // Alinear horizontalmente
     mainContainer.style.gap = '110px';  // Espaciado entre los faders
-    addMainChannel("Left", mainContainer);
+    //addMainChannel("Left", mainContainer);
     addMainChannel("Right", mainContainer);
 }
 
@@ -47,11 +47,18 @@ function addChannel(channelNumber, container = document.getElementById('channels
     `;
     container.insertBefore(channelDiv, document.getElementById('main-channels-container'));
 
+    // Event Listener with debouncer//
     const rangeInput = document.getElementById(`range-input${channelNumber}`);
+
+
+    let debounceTimer;
     rangeInput.addEventListener('input', () => {
-        ws_sendChannelVolume(channelNumber, rangeInput.value);
-        //console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
-    });
+        clearTimeout(debounceTimer);  // Reset timer on each input event
+        debounceTimer = setTimeout(() => {
+            ws_sendChannelVolume(channelNumber, rangeInput.value);
+            // console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+        }, 70);  // Adjust delay (in milliseconds) as needed
+});
 }
 
 // Function to create and append a new main channel
@@ -59,7 +66,7 @@ function addMainChannel(name, container) {
     const channelDiv = document.createElement('div');
     channelDiv.classList.add('bottom-box');
     channelDiv.innerHTML = `
-        <h3>${name}</h3><div class="range_content">
+        <h3>Master</h3><div class="range_content">
             <div class="range_slider">
                 <div class="range_slider-line" id="range-line-${name}"></div>
             </div>
@@ -77,9 +84,23 @@ function addMainChannel(name, container) {
 
 
     const rangeInput = document.getElementById(`range-input-${name}`);
+
+
+    let debounceTimer;
     rangeInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);  // Reset timer on each input event
+        debounceTimer = setTimeout(() => {
+            ws_sendChannelVolume(9, rangeInput.value);
+            // console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+        }, 70);  // Adjust delay (in milliseconds) as needed
+
+
+
+
+
+/*     rangeInput.addEventListener('input', () => {
         ws_sendChannelVolume(name, rangeInput.value);
-        //console.log(`Main Channel ${name} value: ${rangeInput.value}`);
+        //console.log(`Main Channel ${name} value: ${rangeInput.value}`); */
     });
 
 }
@@ -113,10 +134,7 @@ function setupRangeSlider(rangeThumbId, rangeNumberId, rangeLineId, rangeInputId
         const space = rangeInput.offsetWidth - rangeThumb.offsetWidth;
 
         rangeThumb.style.top = (thumbPosition * space) + 'px';
-        
-        /* Invertimos la altura de la línea de color
-        const invertedHeight = 100 - rangeInput.value;
-        rangeLine.style.height = invertedHeight + '%';*/
+
     };
     
     rangeInput.addEventListener('input', rangeInputSlider);

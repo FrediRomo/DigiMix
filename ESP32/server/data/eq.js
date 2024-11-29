@@ -14,7 +14,11 @@
 // WebSocket object for multi-client connection
 
 const DEBUG = false;
+
+
+
 const socket = (DEBUG) ? new WebSocket('ws://localhost:8765') : new WebSocket('ws://192.168.4.1/ws'); 
+
  
 
 
@@ -360,44 +364,64 @@ function updateSliders() {
     }
 }
 
-/**
- * Handles input changes in the frequency slider and updates the corresponding filter.
- */
+// Debounce function
+function debounce(func, delay) {
+    let debounceTimer;
+    return function (...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// Frequency slider with inline debounce
+let freqDebounceTimer;
 document.getElementById('frequencySlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.frequency = parseInt(this.value);
         document.getElementById('frequencyValue').textContent = `${filter.frequency} Hz`;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(freqDebounceTimer);
+        freqDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);  // Adjust delay as needed
     }
 };
 
-/**
- * Handles input changes in the gain slider and updates the corresponding filter.
- */
+// Gain slider with inline debounce
+let gainDebounceTimer;
 document.getElementById('gainSlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.gain = parseFloat(this.value);
         document.getElementById('gainValue').textContent = `${filter.gain} dB`;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(gainDebounceTimer);
+        gainDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);
     }
 };
 
-/**
- * Handles input changes in the Q (quality factor) slider and updates the corresponding filter.
- */
+// Q (quality factor) slider with inline debounce
+let qDebounceTimer;
 document.getElementById('qSlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.q = parseFloat(this.value);
         document.getElementById('qValue').textContent = filter.q;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(qDebounceTimer);
+        qDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);
     }
 };
+
+
 
 /**
  * Handles "mousedown" events on the canvas for dragging filters.
@@ -576,14 +600,35 @@ socket.onopen = () => {
  */
 socket.onmessage = (event) => {
     console.log('Message from server:', event.data);  // Print the message received from the server
+    const receivedMessage = JSON.parse(event.data);
 
-    // Process the filter data received in the message
-    let filter = event.data;
-    filters[filter.id] = filter;  // Update the corresponding filter in the filter array
+    const ctrlChar = receivedMessage.ctrl;
+    console.log(`Control Character: ${ctrlChar}, Channel: ${receivedMessage.channel}, Value: ${receivedMessage.value}`);
 
-    // Update the user interface and redraw the curves with the new filter data
-    updateSliders();
-    drawAllCurves();
+    //check if ctrl char is v for volume control 
+    if (ctrlChar === "v")
+    {
+        const rangeNumberElement = document.getElementById(`range-number${receivedMessage.channel}`);
+        const rangeInputElement = document.getElementById(`range-input${receivedMessage.channel}`);
+        const rangeThumbElement = document.getElementById(`range-thumb${receivedMessage.channel}`);
+
+        if (rangeNumberElement && rangeInputElement && rangeThumbElement) {
+            // Update the displayed value
+            rangeNumberElement.textContent = receivedMessage.value;
+            
+            // Update the input value
+            rangeInputElement.value = receivedMessage.value;
+            
+            // Calculate and update the thumb position
+            const thumbPosition = 1 - (rangeInputElement.value / rangeInputElement.max);
+            const space = rangeInputElement.offsetWidth - rangeThumbElement.offsetWidth;
+            rangeThumbElement.style.top = (thumbPosition * space) + 'px';
+        }
+    } else if (ctrlChar === "f") {
+        console.log("Filter value received");
+    } else {
+        console.error("Invalid control character received");
+    }
 };
 
 /**
@@ -606,10 +651,12 @@ socket.onclose = () => {
  * @param {number} filterIndex - The index of the filter to be sent.
  */
 
-function ws_sendFilterData(filterIndex) {
+function ws_sendFilterData(filterIndex)
+{
     if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length) {
         const filter = filters[filterIndex];
         const data = {
+            ctrl: "f",                // f to tell server we're only sending filter info 
             channel: selectedChannel, // Include channel in the data
             filter_id: filter.id,
             frequency: filter.frequency,
@@ -631,8 +678,9 @@ function ws_sendFilterData(filterIndex) {
 function ws_sendChannelVolume(channelID, value)
 {
     const data = {
+        ctrl: "v",          // V to tell the server we're sending channel volume only
         channel: channelID, // Include channel in the data
-        value: value
+        value: Number(value) 
     }
 
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -645,17 +693,6 @@ function ws_sendChannelVolume(channelID, value)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
                     /*===================================== FUNCTIONS WHEN PAGE LOADS ======================================*/
 
 
@@ -663,4 +700,3 @@ function ws_sendChannelVolume(channelID, value)
 selectChannel(0);
 drawGrid();
 drawAllCurves();
-

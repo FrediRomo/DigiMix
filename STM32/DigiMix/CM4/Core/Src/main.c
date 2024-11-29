@@ -21,12 +21,17 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
+#include <math.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define BUFFER_SIZE 20
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -46,13 +51,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t rxData[BUFFER_SIZE];
 
+uint8_t rxBuffer[BUFFER_SIZE];  // Buffer to store received data
+uint8_t rxChar;                 // Temporary buffer for a single character
+uint16_t rxIndex = 0;           // Index to track position in rxBuffer
+
+uint8_t dataReady;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 static void MX_DMA_Init(void);
 /* USER CODE BEGIN PFP */
-
+void sendM4toM7(uint8_t* data);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -102,6 +113,7 @@ int main(void)
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
 
+  //HAL_UART_Receive_IT(&huart2, rxData, BUFFER_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -123,6 +135,7 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
 }
 

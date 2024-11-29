@@ -21,26 +21,26 @@ void IFX_PeakingFilter_Init(IFX_PeakingFilter *filt, float sampleRate_Hz) {
 	}
 
 	// Calculate all-pass filter
-	IFX_PeakingFilter_SetParameters(filt, 1.0f, 0.0f, 1.0f);
+	IFX_PeakingFilter_SetParameters(filt, 1.0f, 1.0f, 1.0f);
 }
 
-// Compute filter coefficients. (boostCut_linear > 1.0f = boost | boostCut_linear < 1.0f = cut)
-void IFX_PeakingFilter_SetParameters(IFX_PeakingFilter *filt, float centerFrequency_Hz, float bandwidth_Hz, float boostCut_linear) {
+// Compute filter coefficients. (	 > 1.0f = boost | boostCut_linear < 1.0f = cut)
+void IFX_PeakingFilter_SetParameters(IFX_PeakingFilter *filt, float centerFrequency_Hz, float Q, float boostCut_linear) {
 
 	// Convert Hz to rad/s, pre-warp cut off frequency, multiply by sampling time (wc*T = ...)
 	float wcT = 2.0f * tanf(M_PI * centerFrequency_Hz * filt->sampleTime_s);
-
+	float wcT2 = wcT * wcT;
 	// Compute quality factor (Q = f(Center) / f(bandwidth))
-	float Q = centerFrequency_Hz / bandwidth_Hz;
+	float invQ = 1.0f / Q;
 
 	// Compute filter coefficients
-	filt->a[0] = 4.0f + 2.0f * (boostCut_linear / Q) * wcT * wcT * wcT;
-	filt->a[1] = 2.0f * wcT * wcT - 8.0f;
-	filt->a[2] = 4.0f - 2.0f * (boostCut_linear / Q) * wcT * wcT * wcT;
+	filt->a[0] = 4.0f + 2.0f * (boostCut_linear * invQ) * wcT + wcT2;
+	filt->a[1] = 2.0f * wcT2 - 8.0f;
+	filt->a[2] = 4.0f - 2.0f * (boostCut_linear * invQ) * wcT + wcT2;
 
-	filt->b[0] = 1.0f / (4.0f + 2.0f / Q * wcT + wcT * wcT);	// 1 / coefficient
-	filt->b[1] = -(2.0f * wcT * wcT - 8.0f);					// -coefficient
-	filt->b[2] = -(4.0f - 2.0f / Q * wcT + wcT * wcT);			// -coefficient
+	filt->b[0] = 1.0f / (4.0f + 2.0f * invQ * wcT + wcT2);	// 1 / coefficient
+	filt->b[1] = -(2.0f * wcT2 - 8.0f);					// -coefficient
+	filt->b[2] = -(4.0f - 2.0f * invQ * wcT + wcT2);			// -coefficient
 
 }
 
