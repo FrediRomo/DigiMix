@@ -13,6 +13,11 @@ const char* ssid = "DIGIMIX";
 const char* password = "DIGIMIX";
 
 
+// Variables to track debounce
+unsigned long lastUpdateTime = 0;
+const unsigned long debounceDelay = 300;  // Debounce delay in milliseconds
+
+
 // Create server object on port 8765
 AsyncWebServer server(80);
 
@@ -69,8 +74,9 @@ void broadcastToOthers(const String &message, uint32_t excludeClientId)
 
 
 
-void sendFormattedMessage(const char* format, ...) {
-  char buffer[UART_BUFFER_SIZE+1]; // default: 64 chars + null terminator
+void sendFormattedMessage(const char* format, ...)
+{
+  char buffer[UART_BUFFER_SIZE]; // default: 64 chars + null terminator
   va_list args;
   va_start(args, format);
   vsnprintf(buffer, sizeof(buffer), format, args);
@@ -83,7 +89,7 @@ void sendFormattedMessage(const char* format, ...) {
     {
       buffer[i] = ' '; // Padding with spaces
     }
-    buffer[UART_BUFFER_SIZE] = '\0'; // Null terminator
+    buffer[UART_BUFFER_SIZE-1] = '\0'; // Null terminator
   }
 
   Serial.println(buffer); // Send fixed-length message
@@ -91,75 +97,86 @@ void sendFormattedMessage(const char* format, ...) {
 
 
 
-void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client) {
-  AwsFrameInfo *info = (AwsFrameInfo *)arg;
+void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client)
+{
+
+  //Debounce messages to avoid bottleneck
+
+  unsigned long currentTime = millis();
+  if(currentTime - lastUpdateTime >= debounceDelay)
+  {
+    lastUpdateTime = currentTime;
+
+    AwsFrameInfo *info = (AwsFrameInfo *)arg;
   
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-    // Convert the received data to a string
-    String message = String((char *)data, len);
-    //Serial.print("Received WebSocket message: ");
-    //Serial.println(message);
-
-    // Parse the JSON message using Arduino_JSON
-    JSONVar jsonObj = JSON.parse(message);
-
-    // Check if parsing succeeded
-    if (JSON.typeof(jsonObj) == "undefined")
+    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
-      Serial.println("JSON PARSING FAILED!");
-      return;
-    }
+      // Convert the received data to a string
+      String message = String((char *)data, len);
+      //Serial.print("Received WebSocket message: ");
+      //Serial.println(message);
 
-    // Check if "ctrl" key exists
-    if (!jsonObj.hasOwnProperty("ctrl"))
-    {
-      Serial.println("Missing 'ctrl' KEY IN JSON!");
-      return;
-    }
+      // Parse the JSON message using Arduino_JSON
+      JSONVar jsonObj = JSON.parse(message);
 
-    // Extract specific values from the JSON object
-    String ctrlChar = (const char *)jsonObj["ctrl"];  // Extract "ctrl" as a String
-    //Serial.print("Control character: ");
-    //Serial.println(ctrlChar);
-
-    if (ctrlChar == "v") 
-    {  
-      if (!jsonObj.hasOwnProperty("channel") || !jsonObj.hasOwnProperty("value"))
+      // Check if parsing succeeded
+      if (JSON.typeof(jsonObj) == "undefined")
       {
-        Serial.println("MISSING 'CHANNEL' OR 'VALUE' KEYS!");
-        return; 
-      }
-
-    int channel = (int)jsonObj["channel"];
-    int value = (int)jsonObj["value"];
-    // Send formatted 64-char message
-    sendFormattedMessage("v,%d,%d", channel, value);
-    } 
-    else if (ctrlChar == "f") {
-      if (JSON.typeof(jsonObj["channel"]) == "undefined" ||
-          JSON.typeof(jsonObj["filter_id"]) == "undefined" ||
-          JSON.typeof(jsonObj["frequency"]) == "undefined" ||
-          JSON.typeof(jsonObj["gain"]) == "undefined" ||
-          JSON.typeof(jsonObj["q"]) == "undefined") {
-        Serial.println("MISSING OR INVALID KEYS!");
+        Serial.println("JSON PARSING FAILED!");
         return;
       }
 
-  int channel = (int)jsonObj["channel"];
-  int filter_id = (int)jsonObj["filter_id"];
-  int frequency = (int)jsonObj["frequency"];
-  double gain = (double)jsonObj["gain"];
-  double q = (double)jsonObj["q"];
+      // Check if "ctrl" key exists
+      if (!jsonObj.hasOwnProperty("ctrl"))
+      {
+        Serial.println("Missing 'ctrl' KEY IN JSON!");
+        return;
+      }
 
-  // Send formatted 64-char message
-  sendFormattedMessage("f,%d,%d,%d,%.1f,%.1f", channel, filter_id, frequency, gain, q);
-} else {
-  Serial.println("UNKNOWN CONTROL CHARACTER!");
-}
+      // Extract specific values from the JSON object
+      String ctrlChar = (const char *)jsonObj["ctrl"];  // Extract "ctrl" as a String
+      //Serial.print("Control character: ");
+      //Serial.println(ctrlChar);
 
-  // Broadcast message to other clients after successful processing
-  broadcastToOthers(message, client->id());
+      if (ctrlChar == "v") 
+      {  
+        if (!jsonObj.hasOwnProperty("channel") || !jsonObj.hasOwnProperty("value"))
+        {
+          Serial.println("MISSING 'CHANNEL' OR 'VALUE' KEYS!");
+          return; 
+        }
 
+        int channel = (int)jsonObj["channel"];
+        int value = (int)jsonObj["value"];
+        // Send formatted 64-char message
+        sendFormattedMessage("v,%d,%d", channel, value);
+      } 
+      else if (ctrlChar == "f")
+      {
+        if (JSON.typeof(jsonObj["channel"]) == "undefined" || JSON.typeof(jsonObj["filter_id"]) == "undefined" || JSON.typeof(jsonObj["frequency"]) == "undefined" ||  JSON.typeof(jsonObj["gain"]) == "undefined" || JSON.typeof(jsonObj["q"]) == "undefined")
+          {
+            Serial.println("MISSING OR INVALID KEYS!");
+            return;
+          }
+
+        int channel = (int)jsonObj["channel"];
+        int filter_id = (int)jsonObj["filter_id"];
+        int frequency = (int)jsonObj["frequency"];
+        double gain = (double)jsonObj["gain"];
+        double q = (double)jsonObj["q"];
+
+        // Send formatted 64-char message
+        sendFormattedMessage("f,%d,%d,%d,%.1f,%.1f", channel, filter_id, frequency, gain, q);
+      } 
+      else
+      {
+        Serial.println("UNKNOWN CONTROL CHARACTER!");
+      }
+
+      // Broadcast message to other clients after successful processing
+      broadcastToOthers(message, client->id());
+
+    }
   }
 }
 
