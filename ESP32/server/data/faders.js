@@ -43,8 +43,11 @@ function addChannel(channelNumber, container = document.getElementById('channels
             <input type="range" class="range_input" id="range-input${channelNumber}" min="0" max="100" value="50" step="1">
         </div>
 
-        <button class="mute-btn" onclick="muteFilter(${channelNumber})" id="mute-button${channelNumber}">MUTE</button>
     `;
+ 
+    // To add a mute button  
+    // <button class="mute-btn" onclick="muteFilter(${channelNumber})" id="mute-button${channelNumber}">MUTE</button>
+     
     container.insertBefore(channelDiv, document.getElementById('main-channels-container'));
 
     // Event Listener with debouncer//
@@ -78,8 +81,11 @@ function addMainChannel(name, container) {
             <input type="range" class="range_input" id="range-input-${name}" min="0" max="100" value="50" step="1">
         </div>
         
-        <button class="mute-btn" onclick="muteFilter('${name}')" id="mute-button-${name}">MUTE</button>
     `;
+    //To add mute btn
+    // <button class="mute-btn" onclick="muteFilter('${name}')" id="mute-button-${name}">MUTE</button>
+
+
     container.appendChild(channelDiv);
 
 
@@ -141,7 +147,8 @@ function setupRangeSlider(rangeThumbId, rangeNumberId, rangeLineId, rangeInputId
     rangeInputSlider(); // Inicializar el valor
 
     if (muteButton) {
-        muteButton.addEventListener('click', function() {
+        muteButton.addEventListener('click', function()
+        {
             toggleMute(muteButton, rangeInput);
         });
     }
@@ -149,14 +156,19 @@ function setupRangeSlider(rangeThumbId, rangeNumberId, rangeLineId, rangeInputId
 
 function toggleMute(muteButton, rangeInput)
 {
-    // Mute/Unmute channel
+    // IF button is muted, unmute
     if (rangeInput.disabled) 
     {
         rangeInput.disabled = false;
         muteButton.textContent = 'MUTE'; // Cambiar el texto del botón a "Mute"
-        rangeInput.value = muteButton.dataset.previousValue || 50; // Restaurar valor anterior o establecer por defecto a 50
+
+        // send value to websockets
+
+
+        //rangeInput.value = muteButton.dataset.previousValue || 50; // Restaurar valor anterior o establecer por defecto a 50
     }
 
+    //Mute
     else
     {
         muteButton.dataset.previousValue = rangeInput.value; // Guardar el valor actual antes de mutear
@@ -172,4 +184,3 @@ setupRangeSlider('range-thumb0', 'range-number0', 'range-line0', 'range-input0',
 setupRangeSlider('range-thumb1', 'range-number1', 'range-line1', 'range-input1', 'mute-button1');
 setupRangeSlider('range-thumb2', 'range-number2', 'range-line2', 'range-input2', 'mute-button2');
 setupRangeSlider('range-thumb-Right', 'range-number-Right', 'range-line-Right', 'range-input-Right', 'mute-button-Right');
-setupRangeSlider('range-thumb-Left', 'range-number-Left', 'range-line-Left', 'range-input-Left', 'mute-button-Left');
