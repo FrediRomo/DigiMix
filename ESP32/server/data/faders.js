@@ -18,7 +18,7 @@ function initializeChannels()
     mainContainer.style.display = 'flex';  // Asegurar que el contenedor principal sea flexbox
     mainContainer.style.flexDirection = 'row';  // Alinear horizontalmente
     mainContainer.style.gap = '110px';  // Espaciado entre los faders
-    addMainChannel("Left", mainContainer);
+    //addMainChannel("Left", mainContainer);
     addMainChannel("Right", mainContainer);
 }
 
@@ -47,11 +47,18 @@ function addChannel(channelNumber, container = document.getElementById('channels
     `;
     container.insertBefore(channelDiv, document.getElementById('main-channels-container'));
 
+    // Event Listener with debouncer//
     const rangeInput = document.getElementById(`range-input${channelNumber}`);
+
+
+    let debounceTimer;
     rangeInput.addEventListener('input', () => {
-        ws_sendChannelVolume(channelNumber, rangeInput.value);
-        //console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
-    });
+        clearTimeout(debounceTimer);  // Reset timer on each input event
+        debounceTimer = setTimeout(() => {
+            ws_sendChannelVolume(channelNumber, rangeInput.value);
+            // console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+        }, 70);  // Adjust delay (in milliseconds) as needed
+});
 }
 
 // Function to create and append a new main channel

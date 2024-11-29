@@ -364,44 +364,64 @@ function updateSliders() {
     }
 }
 
-/**
- * Handles input changes in the frequency slider and updates the corresponding filter.
- */
+// Debounce function
+function debounce(func, delay) {
+    let debounceTimer;
+    return function (...args) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+// Frequency slider with inline debounce
+let freqDebounceTimer;
 document.getElementById('frequencySlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.frequency = parseInt(this.value);
         document.getElementById('frequencyValue').textContent = `${filter.frequency} Hz`;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(freqDebounceTimer);
+        freqDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);  // Adjust delay as needed
     }
 };
 
-/**
- * Handles input changes in the gain slider and updates the corresponding filter.
- */
+// Gain slider with inline debounce
+let gainDebounceTimer;
 document.getElementById('gainSlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.gain = parseFloat(this.value);
         document.getElementById('gainValue').textContent = `${filter.gain} dB`;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(gainDebounceTimer);
+        gainDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);
     }
 };
 
-/**
- * Handles input changes in the Q (quality factor) slider and updates the corresponding filter.
- */
+// Q (quality factor) slider with inline debounce
+let qDebounceTimer;
 document.getElementById('qSlider').oninput = function () {
     if (selectedFilterIndex !== null) {
         const filter = filters[selectedFilterIndex];
         filter.q = parseFloat(this.value);
         document.getElementById('qValue').textContent = filter.q;
-        drawAllCurves();
-        ws_sendFilterData(selectedFilterIndex);
+        drawAllCurves();  // Immediate update
+
+        clearTimeout(qDebounceTimer);
+        qDebounceTimer = setTimeout(() => {
+            ws_sendFilterData(selectedFilterIndex);  // Debounced call
+        }, 300);
     }
 };
+
+
 
 /**
  * Handles "mousedown" events on the canvas for dragging filters.
