@@ -66,7 +66,7 @@ function addMainChannel(name, container) {
     const channelDiv = document.createElement('div');
     channelDiv.classList.add('bottom-box');
     channelDiv.innerHTML = `
-        <h3>${name}</h3><div class="range_content">
+        <h3>Master</h3><div class="range_content">
             <div class="range_slider">
                 <div class="range_slider-line" id="range-line-${name}"></div>
             </div>
@@ -84,9 +84,23 @@ function addMainChannel(name, container) {
 
 
     const rangeInput = document.getElementById(`range-input-${name}`);
+
+
+    let debounceTimer;
     rangeInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);  // Reset timer on each input event
+        debounceTimer = setTimeout(() => {
+            ws_sendChannelVolume(9, rangeInput.value);
+            // console.log(`Channel ${channelNumber} value: ${rangeInput.value}`);
+        }, 70);  // Adjust delay (in milliseconds) as needed
+
+
+
+
+
+/*     rangeInput.addEventListener('input', () => {
         ws_sendChannelVolume(name, rangeInput.value);
-        //console.log(`Main Channel ${name} value: ${rangeInput.value}`);
+        //console.log(`Main Channel ${name} value: ${rangeInput.value}`); */
     });
 
 }
