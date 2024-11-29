@@ -1,3 +1,15 @@
+/**
+ * @file server.ino
+ * @author Alfredo Romo (frediromo@gmail.com)
+ * @brief UI server that runs a websocket instance to communicate multiple mixer UI clients
+ * @version 0.1
+ * @date 2024-11-29
+ * 
+ * 
+ */
+
+
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <Arduino_JSON.h>
@@ -206,7 +218,7 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
 
 void initWebSocket()
 {
-  Serial.println("\n==== INITIALIZING WEBSOCKETS SERVER =====");
+  //Serial.println("\n==== INITIALIZING WEBSOCKETS SERVER =====");
   ws.onEvent(onEvent);
   server.addHandler(&ws);
   Serial.println("WEBSOCKETS INITIALIZED SUCCESSFULLY");
@@ -227,7 +239,7 @@ void setup()
     // Web Server Root URL
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(LittleFS, "/index.html", "text/html");
-    Serial.println("/ Requested");
+    //Serial.println("/ Requested");
   });
 
   server.serveStatic("/", LittleFS, "/");
