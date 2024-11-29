@@ -5,9 +5,13 @@
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 
+
+#define UART_BUFFER_SIZE 64
+
 // Network Credentials
 const char* ssid = "DIGIMIX";
 const char* password = "DIGIMIX";
+
 
 // Create server object on port 8765
 AsyncWebServer server(80);
@@ -23,9 +27,9 @@ void initLittleFS()
 
   if (!LittleFS.begin(true))
   {
-    Serial.println("An error has occurred while mounting LittleFS");
+    Serial.println("AN ERROR HAS OCCURRED WHILE MOUNTING LITTLEFS");
   }
-  Serial.println("LittleFS mounted successfully");
+  Serial.println("LITTLEFS MOUNTED SUCCESSFULLY");
 }
 
 // Initialize WiFi
@@ -41,12 +45,12 @@ void initWiFi()
 
   if(result)
   {
-    Serial.println("ESP32 Access Point started");
-    Serial.print("IP address: ");
+    Serial.println("ESP32 ACCESS POINT STARTED");
+    Serial.print("IP ADDRESS: ");
     Serial.println(WiFi.softAPIP());
   } else
   {
-    Serial.println("Failed to start AP");
+    Serial.println("FAILED TO START AP");
   }
 }
 
@@ -65,14 +69,36 @@ void broadcastToOthers(const String &message, uint32_t excludeClientId)
 
 
 
+void sendFormattedMessage(const char* format, ...) {
+  char buffer[UART_BUFFER_SIZE+1]; // default: 64 chars + null terminator
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+
+  // Ensure the message is exactly 64 chars long
+  int length = strlen(buffer);
+  if (length < UART_BUFFER_SIZE) {
+    for (int i = length; i < UART_BUFFER_SIZE; i++)
+    {
+      buffer[i] = ' '; // Padding with spaces
+    }
+    buffer[UART_BUFFER_SIZE] = '\0'; // Null terminator
+  }
+
+  Serial.println(buffer); // Send fixed-length message
+}
+
+
+
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocketClient *client) {
   AwsFrameInfo *info = (AwsFrameInfo *)arg;
   
   if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
     // Convert the received data to a string
     String message = String((char *)data, len);
-    Serial.print("Received WebSocket message: ");
-    Serial.println(message);
+    //Serial.print("Received WebSocket message: ");
+    //Serial.println(message);
 
     // Parse the JSON message using Arduino_JSON
     JSONVar jsonObj = JSON.parse(message);
@@ -80,83 +106,60 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len, AsyncWebSocket
     // Check if parsing succeeded
     if (JSON.typeof(jsonObj) == "undefined")
     {
-      Serial.println("JSON parsing failed!");
+      Serial.println("JSON PARSING FAILED!");
       return;
     }
 
     // Check if "ctrl" key exists
     if (!jsonObj.hasOwnProperty("ctrl"))
     {
-      Serial.println("Missing 'ctrl' key in JSON!");
+      Serial.println("Missing 'ctrl' KEY IN JSON!");
       return;
     }
 
     // Extract specific values from the JSON object
     String ctrlChar = (const char *)jsonObj["ctrl"];  // Extract "ctrl" as a String
-    Serial.print("Control character: ");
-    Serial.println(ctrlChar);
+    //Serial.print("Control character: ");
+    //Serial.println(ctrlChar);
 
-    if (ctrlChar == "v")
+    if (ctrlChar == "v") 
     {  
-      // Handle volume-related messages
-      // Check if "channel" and "value" keys exist
       if (!jsonObj.hasOwnProperty("channel") || !jsonObj.hasOwnProperty("value"))
       {
-        Serial.println("Missing 'channel' or 'value' keys!");
+        Serial.println("MISSING 'CHANNEL' OR 'VALUE' KEYS!");
         return; 
       }
 
-      int channel = (int)jsonObj["channel"];  // Convert to integer
-      int value = (int)jsonObj["value"];  // Extract "value" as a String
-
-      // Print extracted values
-      Serial.print("c:");
-      Serial.print(channel);
-      Serial.print("v:");
-      Serial.println(value);
+    int channel = (int)jsonObj["channel"];
+    int value = (int)jsonObj["value"];
+    // Send formatted 64-char message
+    sendFormattedMessage("v,%d,%d", channel, value);
     } 
+    else if (ctrlChar == "f") {
+      if (JSON.typeof(jsonObj["channel"]) == "undefined" ||
+          JSON.typeof(jsonObj["filter_id"]) == "undefined" ||
+          JSON.typeof(jsonObj["frequency"]) == "undefined" ||
+          JSON.typeof(jsonObj["gain"]) == "undefined" ||
+          JSON.typeof(jsonObj["q"]) == "undefined") {
+        Serial.println("MISSING OR INVALID KEYS!");
+        return;
+      }
 
-    else if (ctrlChar == "f") {  // Handle filter-related messages
-  // Check if required keys exist and are of the expected type
-  if (JSON.typeof(jsonObj["channel"]) == "undefined" ||
-      JSON.typeof(jsonObj["filter_id"]) == "undefined" ||
-      JSON.typeof(jsonObj["frequency"]) == "undefined" ||
-      JSON.typeof(jsonObj["gain"]) == "undefined" ||
-      JSON.typeof(jsonObj["q"]) == "undefined")
-  {
-    Serial.println("Missing or invalid 'channel', 'filter_id', 'frequency', 'gain', or 'q' keys!");
-    return;
-  }
-
-  // Extract and cast values from the JSON object
   int channel = (int)jsonObj["channel"];
   int filter_id = (int)jsonObj["filter_id"];
   int frequency = (int)jsonObj["frequency"];
   double gain = (double)jsonObj["gain"];
   double q = (double)jsonObj["q"];
 
-  // Print extracted values for debugging
-  Serial.print("Channel:");
-  Serial.print(channel);
-  Serial.print(",Filter ID:");
-  Serial.print(filter_id);
-  Serial.print(",Frequency:");
-  Serial.print(frequency);
-  Serial.print(",Gain:");
-  Serial.print(gain , 1);
-  Serial.print(",Q:");
-  Serial.println(q, 1);
-
-
-  } 
-  else
-  {
-    Serial.println("Unknown control character!");
-  }
+  // Send formatted 64-char message
+  sendFormattedMessage("f,%d,%d,%d,%.1f,%.1f", channel, filter_id, frequency, gain, q);
+} else {
+  Serial.println("UNKNOWN CONTROL CHARACTER!");
+}
 
   // Broadcast message to other clients after successful processing
   broadcastToOthers(message, client->id());
-  
+
   }
 }
 
@@ -168,10 +171,10 @@ void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType 
   switch (type)
   {
     case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      //erial.printf("WEBSOCKET CLIENT #%u CONNECTED FROM %s\n", client->id(), client->remoteIP().toString().c_str());
       break;
     case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      //Serial.printf("WEBSOCKET CLIENT #%u DISCONNECTED\n", client->id());
       break;
     case WS_EVT_DATA:
       handleWebSocketMessage(arg, data, len, client);
@@ -189,7 +192,7 @@ void initWebSocket()
   Serial.println("\n==== INITIALIZING WEBSOCKETS SERVER =====");
   ws.onEvent(onEvent);
   server.addHandler(&ws);
-  Serial.println("Websockets initialized successfully");
+  Serial.println("WEBSOCKETS INITIALIZED SUCCESSFULLY");
 }
 
 
