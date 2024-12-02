@@ -312,9 +312,16 @@ function addFilterToDropdown(filter) {
 function removeFilter() {
     if (selectedFilterIndex === null) return;
 
+    //send all 0s to websockets
+    ws_sendFilterDelete(selectedFilterIndex);
+    
     filters.splice(selectedFilterIndex, 1); // Remove from the global filters array
     updateFilterDropdown(); // Update the dropdown options
     drawAllCurves(); // Redraw
+
+
+
+
 
     console.log(`Filter removed from Channel ${selectedChannel}`);
 }
@@ -658,10 +665,35 @@ function ws_sendFilterData(filterIndex)
         const data = {
             ctrl: "f",                // f to tell server we're only sending filter info 
             channel: selectedChannel, // Include channel in the data
-            filter_id: filter.id,
+            filter_id: filter.id, 
             frequency: filter.frequency,
             gain: filter.gain,
             q: filter.q
+        };
+
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(data)); // Send the data to the server
+            console.log(`Data sent for Channel ${selectedChannel}:`, data);
+        } else {
+            console.error("WebSocket is not open.");
+        }
+    }
+}
+
+
+
+function ws_sendFilterDelete(filterIndex)
+{
+    if (filterIndex !== null && filterIndex >= 0 && filterIndex < filters.length)
+    {
+        const filter = filters[filterIndex];
+        const data = {
+            ctrl: "f",                // f to tell server we're only sending filter info 
+            channel: selectedChannel, // Include channel in the data
+            filter_id: filter.id,
+            frequency: 0,
+            gain: 1,
+            q: 1
         };
 
         if (socket && socket.readyState === WebSocket.OPEN) {
