@@ -135,12 +135,14 @@ const osSemaphoreAttr_t uartFull_attributes = {
 
 	float vch1 = 1.0f;
 	float vch2 = 1.0f;
+	float vmaster = 1.0f;
 
 	IFX_PeakingFilter filt1;
 	IFX_PeakingFilter filt2;
 	IFX_PeakingFilter filt3;
-	//IFX_PeakingFilter filt4;
-	//IFX_PeakingFilter filt5;
+	IFX_PeakingFilter filt4;
+	IFX_PeakingFilter filt5;
+	IFX_PeakingFilter filt6;
 
 
 /* USER CODE END PV */
@@ -253,9 +255,15 @@ int main(void)
 
 	  UART_Printf("Readyy!\r\n");
 
-	  IFX_PeakingFilter_SetParameters(&filt1, 53.0f, 1.8f, 5.0f);
+	  // CH1
+	  IFX_PeakingFilter_SetParameters(&filt1, 1.0f, 1.0f, 1.0f);
 	  IFX_PeakingFilter_SetParameters(&filt2, 1.0f, 1.0f, 1.0f);
 	  IFX_PeakingFilter_SetParameters(&filt3, 1.0f, 1.0f, 1.0f);
+
+	  // CH2
+	  IFX_PeakingFilter_SetParameters(&filt4, 1.0f, 1.0f, 1.0f);
+	  IFX_PeakingFilter_SetParameters(&filt5, 1.0f, 1.0f, 1.0f);
+	  IFX_PeakingFilter_SetParameters(&filt6, 1.0f, 1.0f, 1.0f);
 
 	  if (HAL_I2SEx_TransmitReceive_DMA(&hi2s3, (uint16_t *) dacData, (uint16_t *) adcData, BUFFER_SIZE) != HAL_OK) {
 		UART_Printf("I2S Full-Duplex DMA initialization failed\n");
@@ -670,8 +678,24 @@ static void MX_GPIO_Init(void)
 		  snprintf(printBuffer, sizeof(printBuffer), "CH: %d\n\r#F: %d\n\rCF: %d \n\rQ: %.5f \n\rGain: %.5f \n\r", channel, filter, newParams.centerFrequency, newParams.qFactor, newParams.gain);
 
 		  // f, #CH, #FILTRO, FREQ, GAIN, Q
+		  if (channel == 0) {
+			if (filter == 0) {
+			  IFX_PeakingFilter_SetParameters(&filt1, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			} else if (filter == 1) {
+			  IFX_PeakingFilter_SetParameters(&filt2, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			} else if (filter == 2) {
+			  IFX_PeakingFilter_SetParameters(&filt3, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			}
+		  } else if (channel == 1) {
+		    if (filter == 0) {
+		      IFX_PeakingFilter_SetParameters(&filt4, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			} else if (filter == 1) {
+		      IFX_PeakingFilter_SetParameters(&filt5, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			} else if (filter == 2) {
+			  IFX_PeakingFilter_SetParameters(&filt6, newParams.centerFrequency, newParams.qFactor, newParams.gain);
+			}
+		  }
 
-		  IFX_PeakingFilter_SetParameters(&filt1, newParams.centerFrequency, newParams.qFactor, newParams.gain);
 
 		  HAL_UART_Transmit(&huart3, (uint8_t*)printBuffer, strlen(printBuffer), HAL_MAX_DELAY);
 
@@ -691,6 +715,8 @@ static void MX_GPIO_Init(void)
 			  vch1 = volumeMultiplier;
 		  } else if (channel == 1) {
 			  vch2 = volumeMultiplier;
+		  } else if (channel == 9) {
+			  vmaster = volumeMultiplier;
 		  }
 
 
@@ -739,12 +765,12 @@ static void MX_GPIO_Init(void)
 
 		leftProcessed = IFX_PeakingFilter_Update(&filt1, leftIn);
 
-		//leftProcessed2 = IFX_PeakingFilter_Update(&filt2, leftProcessed);
+		leftProcessed = IFX_PeakingFilter_Update(&filt2, leftProcessed);
 
-		//leftProcessed2 = IFX_PeakingFilter_Update(&filt3, leftProcessed2);
+		leftProcessed = IFX_PeakingFilter_Update(&filt3, leftProcessed);
 
 		// OUTPUT LEFT
-		leftOut = leftProcessed * vch1;
+		leftOut = leftProcessed * vch1 * vmaster;
 
 		// CONVERTIR SALIDA DAC A SIGNED INT
 		outBufPtr[n] = (int16_t) (FLOAT_TO_INT16(leftOut));
@@ -759,12 +785,12 @@ static void MX_GPIO_Init(void)
 
 		rightProcessed = IFX_PeakingFilter_Update(&filt1, rightIn);
 
-		//rightProcessed2 = IFX_PeakingFilter_Update(&filt2, rightProcessed);
+		rightProcessed = IFX_PeakingFilter_Update(&filt2, rightProcessed);
 
-		//rightProcessed2 = IFX_PeakingFilter_Update(&filt3, rightProcessed2);
+		rightProcessed = IFX_PeakingFilter_Update(&filt3, rightProcessed);
 
 		// OUTPUT RIGHT
-		rightOut = rightProcessed * vch2;
+		rightOut = rightProcessed * vch2 * vmaster;
 
 		// CONVERTIR SALIDA DAC A SIGNED INT
 		outBufPtr[n+2] = (int16_t) (FLOAT_TO_INT16(rightOut));
